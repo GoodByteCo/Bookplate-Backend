@@ -1,14 +1,14 @@
 package main
 
 import (
+	"github.com/GoodByteCo/Bookplate-Backend/Middleware"
+	"github.com/GoodByteCo/Bookplate-Backend/routes"
+	"github.com/GoodByteCo/Bookplate-Backend/routes/auth"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/go-chi/jwtauth"
-	"github.com/holopollock/Bookplate/Middleware"
-	"github.com/holopollock/Bookplate/routes"
-	"github.com/holopollock/Bookplate/routes/auth"
-	"github.com/holopollock/Bookplate/utils"
 	"net/http"
 	"time"
 )

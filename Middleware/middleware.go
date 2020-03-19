@@ -3,8 +3,8 @@ package Middleware
 import (
 	"context"
 	"github.com/go-chi/chi"
-	"github.com/holopollock/Bookplate/Models"
-	"github.com/holopollock/Bookplate/utils"
+	"github.com/GoodByteCo/Bookplate-Backend/Models"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"net/http"
 )
 

@@ -2,8 +2,8 @@ package routes
 
 import (
 	"fmt"
-	"github.com/holopollock/Bookplate/Models"
-	"github.com/holopollock/Bookplate/utils"
+	"github.com/GoodByteCo/Bookplate-Backend/Models"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
 	"net/http"
 	"strings"
