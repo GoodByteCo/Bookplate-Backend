@@ -1,6 +1,9 @@
 package main
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/GoodByteCo/Bookplate-Backend/Middleware"
 	"github.com/GoodByteCo/Bookplate-Backend/routes"
 	"github.com/GoodByteCo/Bookplate-Backend/routes/auth"
@@ -9,8 +12,6 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/go-chi/jwtauth"
-	"net/http"
-	"time"
 )
 
 func init() {

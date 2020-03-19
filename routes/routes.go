@@ -2,11 +2,12 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/GoodByteCo/Bookplate-Backend/Models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
-	"net/http"
-	"strings"
 )
 
 func AddBook(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +51,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	orginalId := b.BookId
 	for !db.Where(Models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
 		b.BookId = fmt.Sprintf("%s%d", orginalId, val)
-		val+=1
+		val += 1
 		emptyBook = Models.Book{}
 	}
 	db.Create(&b)

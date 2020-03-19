@@ -43,11 +43,11 @@ type Book struct {
 }
 
 type WebBook struct {
-	Title string `json:"title"`
-	Year int32 `json:"year"`
-	Author string `json:"author"`
+	Title       string `json:"title"`
+	Year        int32  `json:"year"`
+	Author      string `json:"author"`
 	Description string `json:"description"`
-	CoverUrl string `json:"cover_url"`
+	CoverUrl    string `json:"cover_url"`
 }
 
 func (w WebBook) ToJson() []byte {

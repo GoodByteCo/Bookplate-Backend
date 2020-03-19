@@ -2,13 +2,14 @@ package auth
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
-	"log"
-	"net/http"
-	"os"
 )
 
 func init() {
