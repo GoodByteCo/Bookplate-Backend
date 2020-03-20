@@ -22,31 +22,25 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	names := strings.Split(header.Filename, ".")
 	fmt.Printf("File name %s.%s\n", names[0], names[1])
-	name := fmt.Sprintf("%s.%s", names[0], names[1])
-	// Copy the file data to my buffer
-	// do something with the contents...
-	// I normally have a struct defined and unmarshal into a struct, but this will
-	// work as an example
+	name := utils.String(32)
+	name = fmt.Sprintf("%s.%s", name, names[1])
+	//maybe make random later
+	fmt.Println(name)
 	bookplateBucket := getBucket()
 	metadata := make(map[string]string)
-	//fmt.Println("killme")
-	//fmt.Println(bookplateBucket)
-	_, err = bookplateBucket.UploadFile(name, metadata, file)
+	b2file, err := bookplateBucket.UploadFile(name, metadata, file)
 	if err != nil {
 		fmt.Println(err)
 	}
-	//fmt.Println(b2File)
+	fmt.Println(b2file.UploadTimestamp)
 	url, err := bookplateBucket.FileURL(name)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(url)
 	b := Models.UrlValueToBook(r.Form, url)
-	//fmt.Printf("%+v\n", b)
-
 	db := utils.ConnectToBook()
 	emptyBook := Models.Book{}
-
 	val := 1
 	orginalId := b.BookId
 	for !db.Where(Models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
