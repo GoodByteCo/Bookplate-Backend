@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -70,6 +71,25 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 
+}
+
+func GetAllBooks(w http.ResponseWriter, r *http.Request){
+	var records []Models.Book
+	var webBooks []Models.WebBook
+	db := utils.ConnectToBook()
+	if err := db.Find(&records).Error; err != nil {
+		fmt.Println(err)
+	}
+	for _, book := range records {
+		web := book.ToWebBook()
+		webBooks = append(webBooks, web)
+	}
+	js, err := json.Marshal(webBooks)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{

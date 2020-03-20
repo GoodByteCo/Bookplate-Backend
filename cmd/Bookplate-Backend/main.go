@@ -40,6 +40,7 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", routes.Ping)
+		r.Get("/books", routes.GetAllBooks)
 
 		r.Get("/auth", auth.Auth)
 		r.Get("/auth/callback", auth.AuthCallback)
