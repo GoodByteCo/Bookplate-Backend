@@ -17,3 +17,4 @@ vendor/
 .env
 .idea/
 Gopkg.lock
+.DS_Store
