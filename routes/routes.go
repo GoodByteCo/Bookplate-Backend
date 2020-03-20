@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/GoodByteCo/Bookplate-Backend/Models"
@@ -69,8 +70,8 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 }
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{
-		AccountID:      "4493bae0cfab",
-		ApplicationKey: "0014b61ae1df416e26369c32d62bffad4fbe86690d",
+		AccountID:      os.Getenv("B2_ACCOUNT_ID"),
+		ApplicationKey: os.Getenv("B2_APP_KEY"),
 	})
 	if err != nil {
 		fmt.Println(err)
