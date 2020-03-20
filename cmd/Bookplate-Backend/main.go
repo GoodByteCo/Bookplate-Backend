@@ -39,6 +39,7 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/api", func(r chi.Router) {
+		r.Get("/ping", routes.Ping)
 
 		r.Get("/auth", auth.Auth)
 		r.Get("/auth/callback", auth.AuthCallback)

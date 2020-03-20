@@ -11,6 +11,9 @@ import (
 	"gopkg.in/kothar/go-backblaze.v0"
 )
 
+func Ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Pong"))
+}
 func AddBook(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println(r.Header)
 	r.ParseMultipartForm(32 << 20)

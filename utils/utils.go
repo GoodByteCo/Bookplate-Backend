@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
-	"math/rand"
 	"github.com/GoodByteCo/Bookplate-Backend/Models"
+	"math/rand"
 	"time"
 
 	"github.com/jinzhu/gorm"
