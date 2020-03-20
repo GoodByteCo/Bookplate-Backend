@@ -24,7 +24,7 @@ type Reader struct {
 	Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
 	Friends       pq.Int64Array  `gorm:"type:integer[]"`
 	Token         string
-	EmailHash     string
+	EmailHash     int
 	Plural        bool
 	Books         []Book
 }
