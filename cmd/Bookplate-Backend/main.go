@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -22,7 +23,7 @@ func main() {
 	r := chi.NewRouter()
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedOrigins: []string{"*"},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
@@ -37,19 +38,19 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Group(func(r chi.Router) {
+	r.Route("/api", func(r chi.Router) {
 
 		r.Get("/auth", auth.Auth)
 		r.Get("/auth/callback", auth.AuthCallback)
-
-		r.Post("/add/book", routes.AddBook)
+		r.Route("/book", func(r chi.Router) {
+			r.Post("/add", routes.AddBook)
+			r.Route("/{bookID}", func(r chi.Router) {
+				r.Use(Middleware.ArticleCtx)
+				r.Get("/", routes.GetBook)
+			})
+		})
 	})
 
-	r.Route("/book/{bookID}", func(r chi.Router) {
-		r.Use(Middleware.ArticleCtx)
-		r.Get("/", routes.GetBook)
-
-	})
-
-	_ = http.ListenAndServe(":8080", r)
+	fmt.Println("serving on port 8081")
+	_ = http.ListenAndServe(":8081", r)
 }

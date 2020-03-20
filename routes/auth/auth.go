@@ -1,7 +1,8 @@
 package auth
 
 import (
-	"fmt"
+	"crypto/sha1"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"log"
 	"net/http"
 	"os"
@@ -30,7 +31,17 @@ func AuthCallback(res http.ResponseWriter, req *http.Request) {
 		log.Println(res, err)
 		panic("yikes")
 	}
-	log.Println(gothUser)
+
+	log.Printf ("%+v",gothUser)
+	emailHash, err := h.Write([]byte(gothUser.Email))
+	user, found := utils.GetReaderFromDB(emailHash)
+	if found {
+		gothic.StoreInSession("user_id", string(user.ID), req, res)
+		//http.Redirect(things)
+	} else {
+		//no users
+		res.Write([]byte("lol"))
+	}
 }
 
 func Auth(res http.ResponseWriter, req *http.Request) {
