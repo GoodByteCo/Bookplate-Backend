@@ -1,10 +1,9 @@
-module github.com/GoodByteCo/BookPlate-Backend
+module github.com/GoodByteCo/Bookplate-Backend
 
 go 1.14
 
 require (
 	cloud.google.com/go v0.55.0 // indirect
-	github.com/GoodByteCo/Bookplate-Backend v0.0.0-20200321005859-5649d47af582
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-chi/cors v1.0.1
 	github.com/go-chi/jwtauth v4.0.4+incompatible
