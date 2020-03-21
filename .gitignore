@@ -18,3 +18,5 @@ vendor/
 .idea/
 Gopkg.lock
 .DS_Store
+
+Bookplate-Backend
