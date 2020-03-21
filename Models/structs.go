@@ -3,6 +3,7 @@ package Models
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -50,6 +51,12 @@ type WebBook struct {
 	CoverUrl    string `json:"cover_url"`
 }
 
+type AllWebBook struct {
+	BookId      string `json:"book_id"`
+	Title       string `json:"title"`
+	CoverUrl    string `json:"cover_url"`
+}
+
 func (w WebBook) ToJson() []byte {
 	j, err := json.Marshal(w)
 	if err != nil {
@@ -86,6 +93,14 @@ func (b Book) ToWebBook() WebBook {
 		Author:      b.Author,
 		Description: b.Description,
 		CoverUrl:    b.CoverUrl,
+	}
+}
+
+func (b Book) ToAllWebBook() AllWebBook {
+	return AllWebBook{
+		BookId: b.BookId,
+		Title: b.Title,
+		CoverUrl: b.CoverUrl,
 	}
 }
 

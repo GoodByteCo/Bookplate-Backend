@@ -75,13 +75,13 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 
 func GetAllBooks(w http.ResponseWriter, r *http.Request){
 	var records []Models.Book
-	var webBooks []Models.WebBook
+	var webBooks []Models.AllWebBook
 	db := utils.ConnectToBook()
 	if err := db.Find(&records).Error; err != nil {
 		fmt.Println(err)
 	}
 	for _, book := range records {
-		web := book.ToWebBook()
+		web := book.ToAllWebBook()
 		webBooks = append(webBooks, web)
 	}
 	js, err := json.Marshal(webBooks)
