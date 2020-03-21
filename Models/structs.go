@@ -70,7 +70,7 @@ func UrlValueToBook(v url.Values, url string) Book {
 		Title:       v.Get("bookname"),
 		Year:        int32(year),
 		Author:      v.Get("author"),
-		Description: v.Get("description"),
+		Description: html.EscapeString(v.Get("description")),
 		CoverUrl:    url,
 		ReaderID:    0,
 		CreatedAt:   time.Now(),
