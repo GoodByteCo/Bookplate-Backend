@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/GoodByteCo/Bookplate-Backend/Middleware"
+	"github.com/GoodByteCo/Bookplate-Backend/middleware"
 	"github.com/GoodByteCo/Bookplate-Backend/routes"
 	"github.com/GoodByteCo/Bookplate-Backend/routes/auth"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/go-chi/jwtauth"
 )
@@ -32,11 +32,11 @@ func main() {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})
 	r.Use(c.Handler)
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(chimiddleware.RequestID)
+	r.Use(chimiddleware.RealIP)
+	r.Use(chimiddleware.Logger)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(chimiddleware.Timeout(60 * time.Second))
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", routes.Ping)
@@ -47,7 +47,7 @@ func main() {
 		r.Route("/book", func(r chi.Router) {
 			r.Post("/add", routes.AddBook)
 			r.Route("/{bookID}", func(r chi.Router) {
-				r.Use(Middleware.ArticleCtx)
+				r.Use(middleware.ArticleCtx)
 				r.Get("/", routes.GetBook)
 			})
 		})

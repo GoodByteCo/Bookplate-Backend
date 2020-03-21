@@ -1,4 +1,4 @@
-package Models
+package models
 
 import (
 	"encoding/json"
@@ -52,9 +52,9 @@ type WebBook struct {
 }
 
 type AllWebBook struct {
-	BookId      string `json:"book_id"`
-	Title       string `json:"title"`
-	CoverUrl    string `json:"cover_url"`
+	BookId   string `json:"book_id"`
+	Title    string `json:"title"`
+	CoverUrl string `json:"cover_url"`
 }
 
 func (w WebBook) ToJson() []byte {
@@ -98,8 +98,8 @@ func (b Book) ToWebBook() WebBook {
 
 func (b Book) ToAllWebBook() AllWebBook {
 	return AllWebBook{
-		BookId: b.BookId,
-		Title: b.Title,
+		BookId:   b.BookId,
+		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
 	}
 }

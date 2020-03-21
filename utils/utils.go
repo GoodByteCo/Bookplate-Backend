@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
-	"github.com/GoodByteCo/Bookplate-Backend/Models"
 	"math/rand"
 	"time"
+
+	"github.com/GoodByteCo/Bookplate-Backend/models"
 
 	"github.com/jinzhu/gorm"
 )
@@ -27,7 +28,7 @@ func connect() *gorm.DB {
 func Migrate() {
 	db := connect()
 	fmt.Println()
-	db.AutoMigrate(&Models.Reader{}, &Models.Book{}, &Models.Author{})
+	db.AutoMigrate(&models.Reader{}, &models.Book{}, &models.Author{})
 	db.Close()
 }
 
@@ -41,10 +42,10 @@ func ConnectToReader() *gorm.DB {
 	return db.Table("readers")
 }
 
-func GetReaderFromDB(emailhash int) (Models.Reader, bool) {
+func GetReaderFromDB(emailhash int) (models.Reader, bool) {
 	db := ConnectToReader()
-	emptyReader := Models.Reader{}
-	found := db.Where(Models.Reader{EmailHash:emailhash}).Find(&emptyReader).RecordNotFound()
+	emptyReader := models.Reader{}
+	found := db.Where(models.Reader{EmailHash: emailhash}).Find(&emptyReader).RecordNotFound()
 	defer db.Close()
 	return emptyReader, found
 }
@@ -60,4 +61,3 @@ func StringWithCharset(length int, charset string) string {
 func String(length int) string {
 	return StringWithCharset(length, charset)
 }
-

@@ -13,7 +13,6 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
-
 var h = sha1.New()
 
 func init() {
@@ -32,7 +31,7 @@ func AuthCallback(res http.ResponseWriter, req *http.Request) {
 		panic("yikes")
 	}
 
-	log.Printf ("%+v",gothUser)
+	log.Printf("%+v", gothUser)
 	emailHash, err := h.Write([]byte(gothUser.Email))
 	user, found := utils.GetReaderFromDB(emailHash)
 	if found {

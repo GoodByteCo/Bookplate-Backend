@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GoodByteCo/Bookplate-Backend/Models"
+	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
 )
@@ -16,10 +16,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Pong"))
 }
 func AddBook(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println(r.Header)
 	r.ParseMultipartForm(32 << 20)
-	//fmt.Println(r.Form)
-	//fmt.Println(reflect.TypeOf(r.Form))
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		panic(err)
@@ -43,15 +40,15 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	fmt.Println(url)
-	b := Models.UrlValueToBook(r.Form, url)
+	b := models.UrlValueToBook(r.Form, url)
 	db := utils.ConnectToBook()
-	emptyBook := Models.Book{}
+	emptyBook := models.Book{}
 	val := 1
 	orginalId := b.BookId
-	for !db.Where(Models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
+	for !db.Where(models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
 		b.BookId = fmt.Sprintf("%s%d", orginalId, val)
 		val += 1
-		emptyBook = Models.Book{}
+		emptyBook = models.Book{}
 	}
 	db.Create(&b)
 
@@ -59,7 +56,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 
 func GetBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	book, ok := ctx.Value("book").(Models.Book)
+	book, ok := ctx.Value("book").(models.Book)
 	if !ok {
 		//errpr
 		return
@@ -73,9 +70,9 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetAllBooks(w http.ResponseWriter, r *http.Request){
-	var records []Models.Book
-	var webBooks []Models.AllWebBook
+func GetAllBooks(w http.ResponseWriter, r *http.Request) {
+	var records []models.Book
+	var webBooks []models.AllWebBook
 	db := utils.ConnectToBook()
 	if err := db.Find(&records).Error; err != nil {
 		fmt.Println(err)
