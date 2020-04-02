@@ -35,11 +35,11 @@ func init() {
 
 }
 
-type UserExistError struct{
+type UserExistError struct {
 	email string
 }
 
-func (e UserExistError) Error() string{
+func (e UserExistError) Error() string {
 	return fmt.Sprintf("User with %s email exists", e.email)
 }
 
@@ -47,12 +47,10 @@ type NoUserError struct {
 	email string
 }
 
-
 func (e NoUserError) Error() string {
 	return fmt.Sprintf("No User with %s email exists", e.email)
 
 }
-
 
 func connect() *gorm.DB {
 	db, err := gorm.Open("postgres", "host=localhost port=5432 user=quinnpollock dbname=BookPlateGo password=bookplate sslmode=disable")
@@ -68,7 +66,7 @@ func HashAndSalt(str string) (string, error) {
 	return string(hash), err
 }
 
-func HashEmail(str string) int64{
+func HashEmail(str string) int64 {
 	h := xxhash.New()
 	h.Write([]byte(str))
 	bs := h.Sum(nil)
@@ -78,8 +76,8 @@ func HashEmail(str string) int64{
 }
 
 func GetClaim(ctx context.Context) jwt.MapClaims {
-_, claims, _ := jwtauth.FromContext(ctx)
-return claims
+	_, claims, _ := jwtauth.FromContext(ctx)
+	return claims
 }
 
 func CompareEmail(hashEmail string, email string) bool {
@@ -132,6 +130,10 @@ func AddReader(add models.ReaderAdd) (error, usererror error) {
 	reader := models.Reader{
 		Name:          add.Name,
 		Pronouns:      pronouns,
+		Library:       []string{},
+		ToRead:        []string{},
+		Liked:         []string{},
+		Friends:       []int64{},
 		ProfileColour: randomcolor.GetRandomColorInHex(),
 		PasswordHash:  passwordHash,
 		EmailHash:     emailHash,
@@ -179,5 +181,3 @@ func StringWithCharset(length int, charset string) string {
 func String(length int) string {
 	return StringWithCharset(length, charset)
 }
-
-
