@@ -3,14 +3,21 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
 )
+
+func init() {
+
+}
 
 func Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Pong"))
@@ -51,6 +58,62 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		emptyBook = models.Book{}
 	}
 	db.Create(&b)
+
+}
+
+func AddReader(w http.ResponseWriter, r *http.Request){
+	decoder := json.NewDecoder(r.Body)
+	var reader models.ReaderAdd
+	_ = decoder.Decode(&reader)
+	err, userExist := utils.AddReader(reader)
+	if err != nil {
+		//do something
+		http.Error(w, http.StatusText(500)+": Server Error", 500)
+	}
+	if userExist != nil {
+		return
+		//do something
+	}
+	w.Write([]byte("user added"))
+}
+
+func Login(w http.ResponseWriter, r *http.Request){
+	decoder := json.NewDecoder(r.Body)
+	var loginReader models.LoginReader
+	err := decoder.Decode(&loginReader)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(loginReader.Email)
+	reader, err := utils.CheckIfPresent(loginReader.Email)
+	if err != nil {
+		fmt.Println("uh oh")
+		fmt.Println(err.Error())
+		return
+		//no user redirect to create account
+	}
+	if utils.ConfirmPassword(reader.PasswordHash,loginReader.Password) {
+		expiry := time.Now().Add(time.Hour * 12)
+		mc := jwt.MapClaims{"reader_id": reader.ID, "iss": utils.Issuer}
+		jwtauth.SetIssuedNow(mc)
+		jwtauth.SetExpiry(mc, expiry)
+		_, tokenString, tokenErr := utils.TokenAuth.Encode(mc)
+		if tokenErr != nil {
+			fmt.Println("token Generated Error")
+			http.Error(w, http.StatusText(500)+": "+tokenErr.Error(), 500)
+			return
+		}
+		fmt.Println(tokenString)
+		http.SetCookie(w, &http.Cookie{
+			Name:    "jwt",
+			Value:   tokenString,
+			Expires: expiry,
+		})
+		w.Write([]byte("we did it"))
+	} else {
+		w.Write([]byte("wrong password"))
+	}
+
 
 }
 

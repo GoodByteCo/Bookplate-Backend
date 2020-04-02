@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"crypto/sha1"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"log"
 	"net/http"
@@ -13,7 +12,6 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
-var h = sha1.New()
 
 func init() {
 	//gothic.Store :=
@@ -32,7 +30,7 @@ func AuthCallback(res http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Printf("%+v", gothUser)
-	emailHash, err := h.Write([]byte(gothUser.Email))
+	emailHash := utils.HashEmail(gothUser.Email)
 	user, found := utils.GetReaderFromDB(emailHash)
 	if found {
 		gothic.StoreInSession("user_id", string(user.ID), req, res)

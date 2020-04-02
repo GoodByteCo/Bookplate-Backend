@@ -15,6 +15,24 @@ import (
 	"github.com/lib/pq"
 )
 
+type ReaderAdd struct {
+	Name     string `json:"name"`
+	Pronouns Pronoun `json:"pronouns"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type Pronoun struct {
+	Subject    string `json:"subject"`
+	Object     string `json:"object"`
+	Possessive string `json:"possessive"`
+}
+
+type LoginReader struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Reader struct {
 	gorm.Model
 	Name          string
@@ -24,8 +42,8 @@ type Reader struct {
 	ToRead        pq.StringArray `gorm:"type:varchar(64)[]"`
 	Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
 	Friends       pq.Int64Array  `gorm:"type:integer[]"`
-	Token         string
-	EmailHash     int
+	PasswordHash  string
+	EmailHash     int64
 	Plural        bool
 	Books         []Book
 }

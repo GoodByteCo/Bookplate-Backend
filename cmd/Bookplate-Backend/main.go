@@ -42,8 +42,15 @@ func main() {
 		r.Get("/ping", routes.Ping)
 		r.Get("/books", routes.GetAllBooks)
 
+
 		r.Get("/auth", auth.Auth)
 		r.Get("/auth/callback", auth.AuthCallback)
+		r.Group(func(r chi.Router) {
+			r.Use(chimiddleware.AllowContentType("application/json"))
+			r.Post("/reader/add", routes.AddReader)
+			r.Post("/login", routes.Login)
+		})
+
 		r.Route("/book", func(r chi.Router) {
 			r.Post("/add", routes.AddBook)
 			r.Route("/{bookID}", func(r chi.Router) {
