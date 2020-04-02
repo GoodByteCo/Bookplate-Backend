@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func ArticleCtx(next http.Handler) http.Handler {
+func BookCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bookId := chi.URLParam(r, "bookID")
 		book := models.Book{}

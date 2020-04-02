@@ -71,7 +71,9 @@ func AddReader(w http.ResponseWriter, r *http.Request){
 		http.Error(w, http.StatusText(500)+": Server Error", 500)
 	}
 	if userExist != nil {
+		w.Write([]byte("user exists"))
 		return
+
 		//do something
 	}
 	w.Write([]byte("user added"))
@@ -114,7 +116,16 @@ func Login(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte("wrong password"))
 	}
 
+}
 
+func Logout(w http.ResponseWriter, r *http.Request){
+	http.SetCookie(w, &http.Cookie{
+		Name: "jwt",
+		Value: "",
+		MaxAge: -1,
+	})
+
+	w.Write([]byte("Logged Out"))
 }
 
 func GetBook(w http.ResponseWriter, r *http.Request) {
