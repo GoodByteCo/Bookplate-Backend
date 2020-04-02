@@ -5,7 +5,6 @@ go 1.14
 require (
 	cloud.google.com/go v0.55.0 // indirect
 	github.com/AvraamMavridis/randomcolor v0.0.0-20180822172341-208aff70bf2c
-	github.com/OneOfOne/xxhash v1.2.7 // indirect
 	github.com/cespare/xxhash v1.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v4.0.3+incompatible
