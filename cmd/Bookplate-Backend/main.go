@@ -7,7 +7,6 @@ import (
 
 	"github.com/GoodByteCo/Bookplate-Backend/middleware"
 	"github.com/GoodByteCo/Bookplate-Backend/routes"
-	"github.com/GoodByteCo/Bookplate-Backend/routes/auth"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/go-chi/chi"
 	chimiddleware "github.com/go-chi/chi/middleware"
@@ -41,10 +40,9 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", routes.Ping)
 		r.Get("/books", routes.GetAllBooks)
-
-
-		r.Get("/auth", auth.Auth)
-		r.Get("/auth/callback", auth.AuthCallback)
+		r.Get("/logout", routes.Logout)
+		//r.Get("/auth", auth.Auth)
+		//r.Get("/auth/callback", auth.AuthCallback)
 		r.Group(func(r chi.Router) {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
@@ -54,7 +52,7 @@ func main() {
 		r.Route("/book", func(r chi.Router) {
 			r.Post("/add", routes.AddBook)
 			r.Route("/{bookID}", func(r chi.Router) {
-				r.Use(middleware.ArticleCtx)
+				r.Use(middleware.BookCtx)
 				r.Get("/", routes.GetBook)
 			})
 		})
