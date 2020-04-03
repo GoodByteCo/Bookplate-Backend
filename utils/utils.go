@@ -23,7 +23,7 @@ import (
 var TokenAuth *jwtauth.JWTAuth
 
 var Issuer string
-var seededRand *rand.Rand = rand.New(
+var seededRand = rand.New(
 	rand.NewSource(time.Now().UnixNano()))
 
 const charset = "abcdefghijklmnopqrstuvwxyz" +
@@ -32,7 +32,6 @@ const charset = "abcdefghijklmnopqrstuvwxyz" +
 func init() {
 	Issuer = os.Getenv("ISSUER")
 	TokenAuth = jwtauth.New("HS256", []byte(os.Getenv("TOKENSECRET")), nil)
-
 }
 
 type UserExistError struct {
