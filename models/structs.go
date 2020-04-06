@@ -9,17 +9,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/lib/pq"
 )
 
 type ReaderAdd struct {
-	Name     string `json:"name"`
+	Name     string  `json:"name"`
 	Pronouns Pronoun `json:"pronouns"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
 }
 
 type Pronoun struct {
@@ -29,42 +25,14 @@ type Pronoun struct {
 }
 
 type LoginReader struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
-}
-
-type Reader struct {
-	gorm.Model
-	Name          string
-	Pronouns      postgres.Jsonb
-	ProfileColour string
-	Library       pq.StringArray `gorm:"type:varchar(64)[]"`
-	ToRead        pq.StringArray `gorm:"type:varchar(64)[]"`
-	Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
-	Friends       pq.Int64Array  `gorm:"type:integer[]"`
-	PasswordHash  string
-	EmailHash     int64
-	Plural        bool
-	Books         []Book
-}
-
-type Book struct {
-	BookId      string `gorm:"PRIMARY_KEY;unique"`
-	Title       string
-	Year        int32
-	Author      string
-	Description string `gorm:"type:text"`
-	CoverUrl    string
-	ReaderID    uint
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time `sql:"index"`
 }
 
 type WebBook struct {
 	Title       string `json:"title"`
-	Year        int32  `json:"year"`
-	Author      string `json:"author"`
+	Year        string  `json:"year"`
+	Authors     []Author `json:"authors"`
 	Description string `json:"description"`
 	CoverUrl    string `json:"cover_url"`
 }
@@ -83,7 +51,7 @@ func (w WebBook) ToJson() []byte {
 	return j
 }
 
-func UrlValueToBook(v url.Values, url string) Book {
+func UrlValueToBook(v url.Values, url string) Book{
 	bookid := v.Get("bookname")
 	bookid = strings.ToLower(bookid)
 	bookid = strings.ReplaceAll(bookid, " ", "-")
@@ -93,22 +61,27 @@ func UrlValueToBook(v url.Values, url string) Book {
 	return Book{
 		BookId:      bookid,
 		Title:       v.Get("bookname"),
-		Year:        int32(year),
-		Author:      v.Get("author"),
+		Year:        int(year),
 		Description: html.EscapeString(v.Get("description")),
 		CoverUrl:    url,
 		ReaderID:    0,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		DeletedAt:   nil,
+		Authors: []Author{
+			{
+				AuthorId:  "",
+				Name:      "",
+			},
+
+		},
 	}
 }
 
 func (b Book) ToWebBook() WebBook {
 	return WebBook{
 		Title:       b.Title,
-		Year:        b.Year,
-		Author:      b.Author,
+		Year:        string(b.Year),
 		Description: b.Description,
 		CoverUrl:    b.CoverUrl,
 	}
@@ -122,10 +95,4 @@ func (b Book) ToAllWebBook() AllWebBook {
 	}
 }
 
-type Author struct {
-	AuthorId  string `gorm:"PRIMARY_KEY;unique"`
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
-}
+

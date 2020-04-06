@@ -1,23 +1,31 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"image/jpeg"
+	png2 "image/png"
+	"io"
+	"math/rand"
+	"os"
+	"strconv"
+	"time"
+
+	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/nickalie/go-mozjpegbin"
+	pngquant "github.com/yusukebe/go-pngquant"
 	"golang.org/x/crypto/bcrypt"
-	"math/rand"
-	"os"
-	"time"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 
 	"github.com/AvraamMavridis/randomcolor"
 	"github.com/cespare/xxhash"
-	"github.com/jinzhu/gorm"
 )
 
 var TokenAuth *jwtauth.JWTAuth
@@ -51,13 +59,34 @@ func (e NoUserError) Error() string {
 
 }
 
-func connect() *gorm.DB {
-	db, err := gorm.Open("postgres", "host=localhost port=5432 user=quinnpollock dbname=BookPlateGo password=bookplate sslmode=disable")
+func CompressPng(png io.Reader) io.Reader {
+	img, err := png2.Decode(png)
 	if err != nil {
-		panic("DB Down")
-		fmt.Println(err)
+		panic(err)
 	}
-	return db
+	out := new(bytes.Buffer)
+	cimg, err := pngquant.Compress(img, "1")
+	if err != nil {
+		panic(err)
+	}
+	err = png2.Encode(out, cimg)
+	return out
+}
+
+func CompressJpg(jpg io.Reader) io.Reader {
+	img, err := jpeg.Decode(jpg)
+	if err != nil {
+		panic(err)
+	}
+	out := new(bytes.Buffer)
+	err = mozjpegbin.Encode(out, img, &mozjpegbin.Options{
+		Quality:  80,
+		Optimize: true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
 
 func HashAndSalt(str string) (string, error) {
@@ -109,6 +138,38 @@ func CheckIfPresent(email string) (models.Reader, error) {
 	return reader, nil
 }
 
+//func AddAuthor(add models.Author) error{
+//}
+
+func AddBook(add models.WebBook) error {
+	fmt.Println(add.Year)
+	db := bdb.Connect()
+	authors := add.Authors
+	for i, a := range authors {
+		if a.AuthorId == "" {
+			a.SetStringId()
+			authors[i] = a
+		}
+	}
+	year, _ := strconv.Atoi(add.Year)
+	fmt.Println(add.Authors)
+	book := models.Book{
+		BookId:        "",
+		Title:         add.Title,
+		Year:          year,
+		Description:   add.Description,
+		CoverUrl:      add.CoverUrl,
+		ReaderID: 0, //do thing where i get reader added
+		CreatedAt:     time.Time{},
+		UpdatedAt:     time.Time{},
+		DeletedAt:     nil,
+	}
+	book.SetStringId()
+	fmt.Println("+++++")
+	fmt.Println(book)
+	return db.Create(&book).Association("authors").Append(authors).Error
+}
+
 func AddReader(add models.ReaderAdd) (error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
@@ -125,7 +186,7 @@ func AddReader(add models.ReaderAdd) (error, usererror error) {
 		return err, nil
 	}
 	pronouns := postgres.Jsonb{RawMessage: psPronouns}
-	db := ConnectToReader()
+	db := bdb.ConnectToReader()
 	reader := models.Reader{
 		Name:          add.Name,
 		Pronouns:      pronouns,
@@ -144,25 +205,8 @@ func AddReader(add models.ReaderAdd) (error, usererror error) {
 	return nil, nil
 }
 
-func Migrate() {
-	db := connect()
-	fmt.Println()
-	db.AutoMigrate(&models.Reader{}, &models.Book{}, &models.Author{})
-	db.Close()
-}
-
-func ConnectToBook() *gorm.DB {
-	db := connect()
-	return db.Table("books")
-}
-
-func ConnectToReader() *gorm.DB {
-	db := connect()
-	return db.Table("readers")
-}
-
 func GetReaderFromDB(emailHash int64) (models.Reader, bool) {
-	db := ConnectToReader()
+	db := bdb.ConnectToReader()
 	emptyReader := models.Reader{}
 	found := db.Where(models.Reader{EmailHash: emailHash}).Find(&emptyReader).RecordNotFound()
 	defer db.Close()

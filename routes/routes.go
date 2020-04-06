@@ -3,8 +3,10 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -22,7 +24,8 @@ func init() {
 func Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Pong"))
 }
-func AddBook(w http.ResponseWriter, r *http.Request) {
+
+func UploadBook(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	file, header, err := r.FormFile("file")
 	if err != nil {
@@ -30,6 +33,12 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	names := strings.Split(header.Filename, ".")
+	var photo io.Reader
+	if names[1] == "png" {
+		photo = utils.CompressPng(file)
+	} else if names[1] == "jpeg" || names[1] == "jpg" {
+		photo = utils.CompressJpg(file)
+	}
 	fmt.Printf("File name %s.%s\n", names[0], names[1])
 	name := utils.String(32)
 	name = fmt.Sprintf("%s.%s", name, names[1])
@@ -37,7 +46,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(name)
 	bookplateBucket := getBucket()
 	metadata := make(map[string]string)
-	b2file, err := bookplateBucket.UploadFile(name, metadata, file)
+	b2file, err := bookplateBucket.UploadFile(name, metadata, photo)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -47,19 +56,40 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	fmt.Println(url)
-	b := models.UrlValueToBook(r.Form, url)
-	db := utils.ConnectToBook()
-	emptyBook := models.Book{}
-	val := 1
-	orginalId := b.BookId
-	for !db.Where(models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
-		b.BookId = fmt.Sprintf("%s%d", orginalId, val)
-		val += 1
-		emptyBook = models.Book{}
-	}
-	db.Create(&b)
+	w.Write([]byte(url))
 
 }
+func AddBook(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var book models.WebBook
+	_ = decoder.Decode(&book)
+	err := utils.AddBook(book)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	w.Write([]byte("Uploaded"))
+
+
+
+	//db := utils.ConnectToBook()
+	//emptyBook := models.Book{}
+	//val := 1
+	//orginalId := b.BookId
+	//for !db.Where(models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
+	//	b.BookId = fmt.Sprintf("%s%d", orginalId, val)
+	//	val += 1
+	//	emptyBook = models.Book{}
+	//}
+	//db.Create(&b)
+
+}
+
+//func AddAuthor(w http.ResponseWriter, r *http.Request){
+//	decoder := json.NewDecoder(r.body)
+//
+//}
 
 func AddReader(w http.ResponseWriter, r *http.Request){
 	decoder := json.NewDecoder(r.Body)
@@ -147,7 +177,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	var records []models.Book
 	var webBooks []models.AllWebBook
-	db := utils.ConnectToBook()
+	db := bdb.ConnectToBook()
 	if err := db.Find(&records).Error; err != nil {
 		fmt.Println(err)
 	}

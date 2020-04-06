@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"net/http"
 	"time"
 
 	"github.com/GoodByteCo/Bookplate-Backend/middleware"
 	"github.com/GoodByteCo/Bookplate-Backend/routes"
-	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/go-chi/chi"
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	utils.Migrate()
+	models.Migrate()
 }
 
 func main() {
@@ -56,6 +56,7 @@ func main() {
 				r.Get("/", routes.GetBook)
 			})
 		})
+		r.Post("/upload", routes.UploadBook)
 	})
 
 	fmt.Println("serving on port 8081")
