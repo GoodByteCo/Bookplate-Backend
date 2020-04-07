@@ -29,4 +29,3 @@ func ConnectToAuthor() *gorm.DB {
 	return db.Table("authors")
 
 }
-

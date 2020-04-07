@@ -13,17 +13,17 @@ import (
 )
 
 type Book struct {
-	ID            uint   `gorm:"primary_key" json:"-"`
-	BookId        string `gorm:"unique"`
-	Title         string `json:"title"`
-	Year          int  `json:"year"`
-	Description   string `gorm:"type:text"`
-	CoverUrl      string
-	ReaderID uint
-	CreatedAt     time.Time  `json:"-"`
-	UpdatedAt     time.Time  `json:"-"`
-	DeletedAt     *time.Time `sql:"index" json:"-"`
-	Authors       []Author   `gorm:"many2many:book_authors;"`
+	ID          uint   `gorm:"primary_key" json:"-"`
+	BookId      string `gorm:"unique"`
+	Title       string `json:"title"`
+	Year        int    `json:"year"`
+	Description string `gorm:"type:text"`
+	CoverUrl    string
+	ReaderID    uint
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `sql:"index" json:"-"`
+	Authors     []Author   `gorm:"many2many:book_authors;"`
 }
 
 func (b *Book) ToUrlSafe() {
@@ -107,17 +107,17 @@ func Start(db *gorm.DB) error {
 			ID: "initial",
 			Migrate: func(tx *gorm.DB) error {
 				type Book struct {
-					ID            uint   `gorm:"primary_key" json:"-"`
-					BookId        string `gorm:"unique"`
-					Title         string
-					Year          int32  `json:"year"`
-					Description   string `gorm:"type:text"`
-					CoverUrl      string
-					ReaderID uint
-					CreatedAt     time.Time  `json:"-"`
-					UpdatedAt     time.Time  `json:"-"`
-					DeletedAt     *time.Time `sql:"index" json:"-"`
-					Authors       []Author   `gorm:"many2many:book_authors;"`
+					ID          uint   `gorm:"primary_key" json:"-"`
+					BookId      string `gorm:"unique"`
+					Title       string
+					Year        int32  `json:"year"`
+					Description string `gorm:"type:text"`
+					CoverUrl    string
+					ReaderID    uint
+					CreatedAt   time.Time  `json:"-"`
+					UpdatedAt   time.Time  `json:"-"`
+					DeletedAt   *time.Time `sql:"index" json:"-"`
+					Authors     []Author   `gorm:"many2many:book_authors;"`
 				}
 
 				type Reader struct {

@@ -30,11 +30,11 @@ type LoginReader struct {
 }
 
 type WebBook struct {
-	Title       string `json:"title"`
-	Year        string  `json:"year"`
+	Title       string   `json:"title"`
+	Year        string   `json:"year"`
 	Authors     []Author `json:"authors"`
-	Description string `json:"description"`
-	CoverUrl    string `json:"cover_url"`
+	Description string   `json:"description"`
+	CoverUrl    string   `json:"cover_url"`
 }
 
 type AllWebBook struct {
@@ -51,7 +51,7 @@ func (w WebBook) ToJson() []byte {
 	return j
 }
 
-func UrlValueToBook(v url.Values, url string) Book{
+func UrlValueToBook(v url.Values, url string) Book {
 	bookid := v.Get("bookname")
 	bookid = strings.ToLower(bookid)
 	bookid = strings.ReplaceAll(bookid, " ", "-")
@@ -70,10 +70,9 @@ func UrlValueToBook(v url.Values, url string) Book{
 		DeletedAt:   nil,
 		Authors: []Author{
 			{
-				AuthorId:  "",
-				Name:      "",
+				AuthorId: "",
+				Name:     "",
 			},
-
 		},
 	}
 }
@@ -94,5 +93,3 @@ func (b Book) ToAllWebBook() AllWebBook {
 		CoverUrl: b.CoverUrl,
 	}
 }
-
-

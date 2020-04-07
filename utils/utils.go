@@ -154,15 +154,15 @@ func AddBook(add models.WebBook) error {
 	year, _ := strconv.Atoi(add.Year)
 	fmt.Println(add.Authors)
 	book := models.Book{
-		BookId:        "",
-		Title:         add.Title,
-		Year:          year,
-		Description:   add.Description,
-		CoverUrl:      add.CoverUrl,
-		ReaderID: 0, //do thing where i get reader added
-		CreatedAt:     time.Time{},
-		UpdatedAt:     time.Time{},
-		DeletedAt:     nil,
+		BookId:      "",
+		Title:       add.Title,
+		Year:        year,
+		Description: add.Description,
+		CoverUrl:    add.CoverUrl,
+		ReaderID:    0, //do thing where i get reader added
+		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Time{},
+		DeletedAt:   nil,
 	}
 	book.SetStringId()
 	fmt.Println("+++++")

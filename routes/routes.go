@@ -71,8 +71,6 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte("Uploaded"))
 
-
-
 	//db := utils.ConnectToBook()
 	//emptyBook := models.Book{}
 	//val := 1
@@ -91,7 +89,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 //
 //}
 
-func AddReader(w http.ResponseWriter, r *http.Request){
+func AddReader(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var reader models.ReaderAdd
 	_ = decoder.Decode(&reader)
@@ -109,7 +107,7 @@ func AddReader(w http.ResponseWriter, r *http.Request){
 	w.Write([]byte("user added"))
 }
 
-func Login(w http.ResponseWriter, r *http.Request){
+func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var loginReader models.LoginReader
 	err := decoder.Decode(&loginReader)
@@ -124,7 +122,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		return
 		//no user redirect to create account
 	}
-	if utils.ConfirmPassword(reader.PasswordHash,loginReader.Password) {
+	if utils.ConfirmPassword(reader.PasswordHash, loginReader.Password) {
 		expiry := time.Now().Add(time.Hour * 12)
 		mc := jwt.MapClaims{"reader_id": reader.ID, "iss": utils.Issuer}
 		jwtauth.SetIssuedNow(mc)
@@ -148,10 +146,10 @@ func Login(w http.ResponseWriter, r *http.Request){
 
 }
 
-func Logout(w http.ResponseWriter, r *http.Request){
+func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name: "jwt",
-		Value: "",
+		Name:   "jwt",
+		Value:  "",
 		MaxAge: -1,
 	})
 

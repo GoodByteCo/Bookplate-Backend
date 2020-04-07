@@ -12,7 +12,6 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
-
 func init() {
 	//gothic.Store :=
 	goth.UseProviders(
