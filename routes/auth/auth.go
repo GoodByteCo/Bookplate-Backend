@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"

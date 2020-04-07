@@ -39,13 +39,12 @@ type ResWebBook struct {
 	Authors     AuthorsForBook `json:"authors"`
 	Description string         `json:"description"`
 	CoverUrl    string         `json:"cover_url"`
-
 }
 
 type BookForAuthor struct {
-	BookId string `json:"book_id"`
-	Year int `json:"-"`
-	Title string `json:"title"`
+	BookId   string `json:"book_id"`
+	Year     int    `json:"-"`
+	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
 }
 
@@ -56,7 +55,7 @@ type ResWebAuthor struct {
 
 type AuthorForBook struct {
 	AuthorId string `json:"author_id"`
-	Name string `json:"name"`
+	Name     string `json:"name"`
 }
 
 type AuthorsForBook []AuthorForBook
@@ -76,7 +75,7 @@ type AllWebBook struct {
 }
 
 func (a *BooksForAuthor) Sort() {
-	sort.SliceStable(a, func(i, j int) bool {return (*a)[i].Year < (*a)[j].Year})
+	sort.SliceStable(a, func(i, j int) bool { return (*a)[i].Year < (*a)[j].Year })
 }
 
 func (w ReqWebBook) ToJson() []byte {

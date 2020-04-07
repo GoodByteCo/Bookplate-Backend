@@ -2,14 +2,15 @@ package models
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/lib/pq"
 	"gopkg.in/gormigrate.v1"
-	"regexp"
-	"strings"
-	"time"
 )
 
 type Book struct {

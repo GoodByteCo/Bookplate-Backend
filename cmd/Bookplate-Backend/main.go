@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"net/http"
 	"time"
+
+	"github.com/GoodByteCo/Bookplate-Backend/models"
 
 	"github.com/GoodByteCo/Bookplate-Backend/middleware"
 	"github.com/GoodByteCo/Bookplate-Backend/routes"

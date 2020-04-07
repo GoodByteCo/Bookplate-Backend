@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"context"
-	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
 	"net/http"
+
+	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/go-chi/chi"
@@ -18,7 +19,7 @@ func BookCtx(next http.Handler) http.Handler {
 		db.Where(models.Book{BookId: bookId}).First(&book)
 		db.Model(&book).Related(&authors, "Authors")
 		ctx := context.WithValue(r.Context(), "book", book)
-		ctx = context.WithValue(ctx,"authors", authors)
+		ctx = context.WithValue(ctx, "authors", authors)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

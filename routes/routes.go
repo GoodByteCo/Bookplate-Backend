@@ -3,14 +3,15 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/jwtauth"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
@@ -71,7 +72,6 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte("Uploaded"))
 }
-
 
 //func AddAuthor(w http.ResponseWriter, r *http.Request){
 //	decoder := json.NewDecoder(r.body)
