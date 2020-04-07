@@ -3,13 +3,8 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"html"
-	"net/url"
-	"regexp"
 	"sort"
 	"strconv"
-	"strings"
-	"time"
 )
 
 type ReaderAdd struct {
@@ -38,6 +33,15 @@ type WebBook struct {
 	CoverUrl    string   `json:"cover_url"`
 }
 
+type ResWebBook struct {
+	Title       string   `json:"title"`
+	Year        string   `json:"year"`
+	Authors     BookAuthors `json:"authors"`
+	Description string   `json:"description"`
+	CoverUrl    string   `json:"cover_url"`
+
+}
+
 type AuthorBook struct {
 	BookId string `json:"book_id"`
 	Year int `json:"-"`
@@ -51,9 +55,18 @@ func (a *AuthorBooks) Sort() {
 	sort.SliceStable(a, func(i, j int) bool {return (*a)[i].Year < (*a)[j].Year})
 }
 
+type BookAuthor struct {
+	AuthorId string `json:"author_id"`
+	Name string `json:"name"`
+}
+
+type BookAuthors []BookAuthor
+
 type Books []Book
 
 type WebBooks []WebBook
+
+type Authors []Author
 
 type AllWebBook struct {
 	BookId   string `json:"book_id"`
@@ -74,36 +87,37 @@ func (w WebBook) ToJson() []byte {
 	return j
 }
 
-func UrlValueToBook(v url.Values, url string) Book {
-	bookid := v.Get("bookname")
-	bookid = strings.ToLower(bookid)
-	bookid = strings.ReplaceAll(bookid, " ", "-")
-	reg, _ := regexp.Compile("[^a-zA-Z0-9\\-]+")
-	bookid = reg.ReplaceAllString(bookid, "")
-	year, _ := strconv.Atoi(v.Get("year"))
-	return Book{
-		BookId:      bookid,
-		Title:       v.Get("bookname"),
-		Year:        year,
-		Description: html.EscapeString(v.Get("description")),
-		CoverUrl:    url,
-		ReaderID:    0,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		DeletedAt:   nil,
-		Authors: []Author{
-			{
-				AuthorId: "",
-				Name:     "",
-			},
-		},
+func (a Author) ToBookAuthor() BookAuthor {
+	return BookAuthor{
+		AuthorId: a.AuthorId,
+		Name:     a.Name,
 	}
+
+}
+
+func (as Authors) ToBookAuthors() BookAuthors {
+	var authors BookAuthors
+	for _, a := range as {
+		authors = append(authors, a.ToBookAuthor())
+	}
+	return authors
+
 }
 
 func (b Book) ToWebBook() WebBook {
 	return WebBook{
 		Title:       b.Title,
 		Year:        strconv.Itoa(b.Year),
+		Description: b.Description,
+		CoverUrl:    b.CoverUrl,
+	}
+}
+
+func (b Book) ToResWebBook(author Authors) ResWebBook {
+	return ResWebBook{
+		Title:       b.Title,
+		Year:        strconv.Itoa(b.Year),
+		Authors:     author.ToBookAuthors(),
 		Description: b.Description,
 		CoverUrl:    b.CoverUrl,
 	}
@@ -123,15 +137,6 @@ func (b Book) ToAllWebBook() AllWebBook {
 		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
 	}
-}
-
-func (bs Books) ToWebBooks() WebBooks{
-	var books WebBooks
-	for _, b := range bs {
-		books = append(books, b.ToWebBook())
-	}
-	return books
-
 }
 
 func (bs Books) ToAuthorBooks() AuthorBooks{
@@ -162,3 +167,10 @@ func (w WebAuthor) ToJson() []byte {
 	return j
 }
 
+func (w ResWebBook) ToJson() []byte {
+	j, err := json.Marshal(w)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return j
+}

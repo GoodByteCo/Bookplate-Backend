@@ -152,13 +152,13 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
+	authors, ok := ctx.Value("authors").([]models.Author)
 	fmt.Println(book)
-	webbook := book.ToWebBook()
+	webbook := book.ToResWebBook(authors)
 	js := webbook.ToJson()
 	fmt.Println(string(js))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
-
 }
 
 func GetAuthor(w http.ResponseWriter, r *http.Request) {

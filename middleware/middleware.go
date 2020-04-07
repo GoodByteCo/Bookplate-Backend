@@ -13,9 +13,12 @@ func BookCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bookId := chi.URLParam(r, "bookID")
 		book := models.Book{}
+		var authors []models.Author
 		db := db2.Connect()
 		db.Where(models.Book{BookId: bookId}).First(&book)
+		db.Model(&book).Related(&authors, "Authors")
 		ctx := context.WithValue(r.Context(), "book", book)
+		ctx = context.WithValue(ctx,"authors", authors)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
