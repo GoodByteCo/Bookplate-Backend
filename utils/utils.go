@@ -165,8 +165,6 @@ func AddBook(add models.WebBook) error {
 		DeletedAt:   nil,
 	}
 	book.SetStringId()
-	fmt.Println("+++++")
-	fmt.Println(book)
 	return db.Create(&book).Association("authors").Append(authors).Error
 }
 

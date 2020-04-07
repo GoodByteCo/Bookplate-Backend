@@ -22,7 +22,7 @@ func main() {
 	r := chi.NewRouter()
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: []string{"https://bookplate.co"},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
@@ -37,7 +37,7 @@ func main() {
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.Timeout(60 * time.Second))
 
-	r.Route("/api", func(r chi.Router) {
+	r.Route("/", func(r chi.Router) {
 		r.Get("/ping", routes.Ping)
 		r.Get("/books", routes.GetAllBooks)
 		r.Get("/logout", routes.Logout)
@@ -47,6 +47,13 @@ func main() {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
 			r.Post("/login", routes.Login)
+		})
+
+		r.Route("/author", func(r chi.Router) {
+			r.Route("/{authorID}", func(r chi.Router) {
+				r.Use(middleware.AuthorCtx)
+				r.Get("/", routes.GetAuthor)
+			})
 		})
 
 		r.Route("/book", func(r chi.Router) {

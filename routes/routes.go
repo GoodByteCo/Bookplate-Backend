@@ -70,19 +70,8 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Uploaded"))
-
-	//db := utils.ConnectToBook()
-	//emptyBook := models.Book{}
-	//val := 1
-	//orginalId := b.BookId
-	//for !db.Where(models.Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
-	//	b.BookId = fmt.Sprintf("%s%d", orginalId, val)
-	//	val += 1
-	//	emptyBook = models.Book{}
-	//}
-	//db.Create(&b)
-
 }
+
 
 //func AddAuthor(w http.ResponseWriter, r *http.Request){
 //	decoder := json.NewDecoder(r.body)
@@ -170,6 +159,25 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 
+}
+
+func GetAuthor(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	author, ok := ctx.Value("author").(models.Author)
+	if !ok {
+		//errpr
+		return
+	}
+	books, ok := ctx.Value("books").([]models.Book)
+	if !ok {
+		//errpr
+		return
+	}
+	fmt.Println(author)
+	webAuthor := author.ToWebAuthor(books)
+	js := webAuthor.ToJson()
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 func GetAllBooks(w http.ResponseWriter, r *http.Request) {

@@ -6,6 +6,7 @@ import (
 	"html"
 	"net/url"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -37,10 +38,32 @@ type WebBook struct {
 	CoverUrl    string   `json:"cover_url"`
 }
 
+type AuthorBook struct {
+	BookId string `json:"book_id"`
+	Year int `json:"-"`
+	Title string `json:"title"`
+	CoverUrl string `json:"cover_url"`
+}
+
+type AuthorBooks []AuthorBook
+
+func (a *AuthorBooks) Sort() {
+	sort.SliceStable(a, func(i, j int) bool {return (*a)[i].Year < (*a)[j].Year})
+}
+
+type Books []Book
+
+type WebBooks []WebBook
+
 type AllWebBook struct {
 	BookId   string `json:"book_id"`
 	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
+}
+
+type WebAuthor struct {
+	Name string `json:"name"`
+	Books AuthorBooks `json:"books"`
 }
 
 func (w WebBook) ToJson() []byte {
@@ -61,7 +84,7 @@ func UrlValueToBook(v url.Values, url string) Book {
 	return Book{
 		BookId:      bookid,
 		Title:       v.Get("bookname"),
-		Year:        int(year),
+		Year:        year,
 		Description: html.EscapeString(v.Get("description")),
 		CoverUrl:    url,
 		ReaderID:    0,
@@ -80,9 +103,17 @@ func UrlValueToBook(v url.Values, url string) Book {
 func (b Book) ToWebBook() WebBook {
 	return WebBook{
 		Title:       b.Title,
-		Year:        string(b.Year),
+		Year:        strconv.Itoa(b.Year),
 		Description: b.Description,
 		CoverUrl:    b.CoverUrl,
+	}
+}
+
+func (b Book) ToAuthorBook() AuthorBook {
+	return AuthorBook{
+		BookId:   b.BookId,
+		Title:    b.Title,
+		CoverUrl: b.CoverUrl,
 	}
 }
 
@@ -93,3 +124,41 @@ func (b Book) ToAllWebBook() AllWebBook {
 		CoverUrl: b.CoverUrl,
 	}
 }
+
+func (bs Books) ToWebBooks() WebBooks{
+	var books WebBooks
+	for _, b := range bs {
+		books = append(books, b.ToWebBook())
+	}
+	return books
+
+}
+
+func (bs Books) ToAuthorBooks() AuthorBooks{
+	var books AuthorBooks
+	if &bs != nil {
+		for _, b := range bs {
+			books = append(books, b.ToAuthorBook())
+		}
+		if len(books) > 1 {
+			books.Sort()
+		}
+	}
+	return books
+}
+
+func (a Author) ToWebAuthor(b Books) WebAuthor {
+	return WebAuthor{
+		Name:  a.Name,
+		Books: b.ToAuthorBooks(),
+	}
+}
+
+func (w WebAuthor) ToJson() []byte {
+	j, err := json.Marshal(w)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return j
+}
+
