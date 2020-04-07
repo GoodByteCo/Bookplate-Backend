@@ -13,6 +13,7 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
+//Book type for database
 type Book struct {
 	ID          uint   `gorm:"primary_key" json:"-"`
 	BookId      string `gorm:"unique"`
@@ -27,16 +28,18 @@ type Book struct {
 	Authors     []Author   `gorm:"many2many:book_authors;"`
 }
 
+//Remove non url safe characters from book title and set it as Id
 func (b *Book) ToUrlSafe() {
-	bookid := b.Title
-	bookid = strings.ToLower(bookid)
-	bookid = strings.ReplaceAll(bookid, " ", "-")
+	bookId := b.Title
+	bookId = strings.ToLower(bookId)
+	bookId = strings.ReplaceAll(bookId, " ", "-")
 	reg, _ := regexp.Compile("[^a-zA-Z0-9\\-]+")
-	bookid = reg.ReplaceAllString(bookid, "")
-	b.BookId = bookid
+	bookId = reg.ReplaceAllString(bookId, "")
+	b.BookId = bookId
 	fmt.Println(b.BookId)
 }
 
+//Find if Book Id exist and append number if so
 func (b *Book) SetStringId() {
 	db := bdb.ConnectToBook()
 	fmt.Println(b.Title)
@@ -52,6 +55,7 @@ func (b *Book) SetStringId() {
 	}
 }
 
+//Reader type for database
 type Reader struct {
 	ID            uint       `gorm:"primary_key" json:"-"`
 	CreatedAt     time.Time  `json:"-"`
@@ -70,6 +74,7 @@ type Reader struct {
 	Books         []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
 }
 
+//Author type for database
 type Author struct {
 	ID        uint       `gorm:"primary_key" json:"-"`
 	AuthorId  string     `gorm:"unique" json:"id"`
@@ -80,28 +85,31 @@ type Author struct {
 	Books     []Book     `gorm:"many2many:book_authors;"`
 }
 
+//Remove non url safe characters from author name and set it as Id
 func (a *Author) ToUrlSafe() {
-	authorid := a.Name
-	authorid = strings.ToLower(authorid)
-	authorid = strings.ReplaceAll(authorid, " ", "-")
+	authorId := a.Name
+	authorId = strings.ToLower(authorId)
+	authorId = strings.ReplaceAll(authorId, " ", "-")
 	reg, _ := regexp.Compile("[^a-zA-Z0-9\\-]+")
-	authorid = reg.ReplaceAllString(authorid, "")
-	a.AuthorId = authorid
+	authorId = reg.ReplaceAllString(authorId, "")
+	a.AuthorId = authorId
 }
 
+//Find if BookId exist and append number if so
 func (a *Author) SetStringId() {
 	db := bdb.ConnectToAuthor()
 	a.ToUrlSafe()
 	emptyAuthor := Author{}
 	val := 1
-	orginalId := a.AuthorId
+	originalId := a.AuthorId
 	for !db.Where(Author{AuthorId: a.AuthorId}).Find(&emptyAuthor).RecordNotFound() {
-		a.AuthorId = fmt.Sprintf("%s%d", orginalId, val)
+		a.AuthorId = fmt.Sprintf("%s%d", originalId, val)
 		val += 1
 		emptyAuthor = Author{}
 	}
 }
 
+//Migration Function Update as database structs change
 func Start(db *gorm.DB) error {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		{

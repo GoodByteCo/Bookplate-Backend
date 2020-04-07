@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+//Reader gotten from Request to add reader
 type ReqReader struct {
 	Name     string  `json:"name"`
 	Pronouns Pronoun `json:"pronouns"`
@@ -20,11 +21,13 @@ type Pronoun struct {
 	Possessive string `json:"possessive"`
 }
 
+//Reader gotten from login request
 type LoginReader struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+//Book Info gotten from request to add book
 type ReqWebBook struct {
 	Title       string   `json:"title"`
 	Year        string   `json:"year"`
@@ -33,32 +36,38 @@ type ReqWebBook struct {
 	CoverUrl    string   `json:"cover_url"`
 }
 
+//Book info sent to site
 type ResWebBook struct {
-	Title       string         `json:"title"`
-	Year        string         `json:"year"`
-	Authors     AuthorsForBook `json:"authors"`
-	Description string         `json:"description"`
-	CoverUrl    string         `json:"cover_url"`
+	Title       string            `json:"title"`
+	Year        string            `json:"year"`
+	Authors     ResAuthorsForBook `json:"authors"`
+	Description string            `json:"description"`
+	CoverUrl    string            `json:"cover_url"`
 }
 
-type BookForAuthor struct {
+//Book data for author request
+type ResBookForAuthor struct {
 	BookId   string `json:"book_id"`
 	Year     int    `json:"-"`
 	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
 }
 
+//Author data to respond to request for author
 type ResWebAuthor struct {
-	Name  string         `json:"name"`
-	Books BooksForAuthor `json:"books"`
+	Name  string            `json:"name"`
+	Books ResBooksForAuthor `json:"books"`
 }
 
-type AuthorForBook struct {
+//Author data for book request
+type ResAuthorForBook struct {
 	AuthorId string `json:"author_id"`
 	Name     string `json:"name"`
 }
 
-type AuthorsForBook []AuthorForBook
+//List aliases
+
+type ResAuthorsForBook []ResAuthorForBook
 
 type Books []Book
 
@@ -66,15 +75,16 @@ type ReqWebBooks []ReqWebBook
 
 type Authors []Author
 
-type BooksForAuthor []BookForAuthor
+type ResBooksForAuthor []ResBookForAuthor
 
+//Info when asking for all books
 type AllWebBook struct {
 	BookId   string `json:"book_id"`
 	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
 }
 
-func (a *BooksForAuthor) Sort() {
+func (a *ResBooksForAuthor) Sort() {
 	sort.SliceStable(a, func(i, j int) bool { return (*a)[i].Year < (*a)[j].Year })
 }
 
@@ -86,16 +96,16 @@ func (w ReqWebBook) ToJson() []byte {
 	return j
 }
 
-func (a Author) ToBookAuthor() AuthorForBook {
-	return AuthorForBook{
+func (a Author) ToBookAuthor() ResAuthorForBook {
+	return ResAuthorForBook{
 		AuthorId: a.AuthorId,
 		Name:     a.Name,
 	}
 
 }
 
-func (as Authors) ToBookAuthors() AuthorsForBook {
-	var authors AuthorsForBook
+func (as Authors) ToBookAuthors() ResAuthorsForBook {
+	var authors ResAuthorsForBook
 	for _, a := range as {
 		authors = append(authors, a.ToBookAuthor())
 	}
@@ -122,8 +132,8 @@ func (b Book) ToResWebBook(author Authors) ResWebBook {
 	}
 }
 
-func (b Book) ToBookForAuthor() BookForAuthor {
-	return BookForAuthor{
+func (b Book) ToBookForAuthor() ResBookForAuthor {
+	return ResBookForAuthor{
 		BookId:   b.BookId,
 		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
@@ -138,8 +148,8 @@ func (b Book) ToAllWebBook() AllWebBook {
 	}
 }
 
-func (bs Books) ToAuthorBooks() BooksForAuthor {
-	var books BooksForAuthor
+func (bs Books) ToAuthorBooks() ResBooksForAuthor {
+	var books ResBooksForAuthor
 	if &bs != nil {
 		for _, b := range bs {
 			books = append(books, b.ToBookForAuthor())
