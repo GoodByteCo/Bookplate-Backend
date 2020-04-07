@@ -19,7 +19,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nickalie/go-mozjpegbin"
-	pngquant "github.com/yusukebe/go-pngquant"
+	"github.com/yusukebe/go-pngquant"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
@@ -141,7 +141,7 @@ func CheckIfPresent(email string) (models.Reader, error) {
 //func AddAuthor(add models.Author) error{
 //}
 
-func AddBook(add models.WebBook) error {
+func AddBook(add models.ReqWebBook) error {
 	fmt.Println(add.Year)
 	db := bdb.Connect()
 	authors := add.Authors
@@ -168,7 +168,7 @@ func AddBook(add models.WebBook) error {
 	return db.Create(&book).Association("authors").Append(authors).Error
 }
 
-func AddReader(add models.ReaderAdd) (error, usererror error) {
+func AddReader(add models.ReqReader) (error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
 	if !noUser {

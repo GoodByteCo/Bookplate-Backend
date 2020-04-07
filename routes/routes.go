@@ -62,7 +62,7 @@ func UploadBook(w http.ResponseWriter, r *http.Request) {
 func AddBook(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
-	var book models.WebBook
+	var book models.ReqWebBook
 	_ = decoder.Decode(&book)
 	err := utils.AddBook(book)
 	if err != nil {
@@ -80,7 +80,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 
 func AddReader(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var reader models.ReaderAdd
+	var reader models.ReqReader
 	_ = decoder.Decode(&reader)
 	err, userExist := utils.AddReader(reader)
 	if err != nil {

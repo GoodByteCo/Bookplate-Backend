@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type ReaderAdd struct {
+type ReqReader struct {
 	Name     string  `json:"name"`
 	Pronouns Pronoun `json:"pronouns"`
 	Email    string  `json:"email"`
@@ -25,7 +25,7 @@ type LoginReader struct {
 	Password string `json:"password"`
 }
 
-type WebBook struct {
+type ReqWebBook struct {
 	Title       string   `json:"title"`
 	Year        string   `json:"year"`
 	Authors     []Author `json:"authors"`
@@ -34,39 +34,40 @@ type WebBook struct {
 }
 
 type ResWebBook struct {
-	Title       string   `json:"title"`
-	Year        string   `json:"year"`
-	Authors     BookAuthors `json:"authors"`
-	Description string   `json:"description"`
-	CoverUrl    string   `json:"cover_url"`
+	Title       string         `json:"title"`
+	Year        string         `json:"year"`
+	Authors     AuthorsForBook `json:"authors"`
+	Description string         `json:"description"`
+	CoverUrl    string         `json:"cover_url"`
 
 }
 
-type AuthorBook struct {
+type BookForAuthor struct {
 	BookId string `json:"book_id"`
 	Year int `json:"-"`
 	Title string `json:"title"`
 	CoverUrl string `json:"cover_url"`
 }
 
-type AuthorBooks []AuthorBook
-
-func (a *AuthorBooks) Sort() {
-	sort.SliceStable(a, func(i, j int) bool {return (*a)[i].Year < (*a)[j].Year})
+type ResWebAuthor struct {
+	Name  string         `json:"name"`
+	Books BooksForAuthor `json:"books"`
 }
 
-type BookAuthor struct {
+type AuthorForBook struct {
 	AuthorId string `json:"author_id"`
 	Name string `json:"name"`
 }
 
-type BookAuthors []BookAuthor
+type AuthorsForBook []AuthorForBook
 
 type Books []Book
 
-type WebBooks []WebBook
+type ReqWebBooks []ReqWebBook
 
 type Authors []Author
+
+type BooksForAuthor []BookForAuthor
 
 type AllWebBook struct {
 	BookId   string `json:"book_id"`
@@ -74,12 +75,11 @@ type AllWebBook struct {
 	CoverUrl string `json:"cover_url"`
 }
 
-type WebAuthor struct {
-	Name string `json:"name"`
-	Books AuthorBooks `json:"books"`
+func (a *BooksForAuthor) Sort() {
+	sort.SliceStable(a, func(i, j int) bool {return (*a)[i].Year < (*a)[j].Year})
 }
 
-func (w WebBook) ToJson() []byte {
+func (w ReqWebBook) ToJson() []byte {
 	j, err := json.Marshal(w)
 	if err != nil {
 		fmt.Println(err)
@@ -87,16 +87,16 @@ func (w WebBook) ToJson() []byte {
 	return j
 }
 
-func (a Author) ToBookAuthor() BookAuthor {
-	return BookAuthor{
+func (a Author) ToBookAuthor() AuthorForBook {
+	return AuthorForBook{
 		AuthorId: a.AuthorId,
 		Name:     a.Name,
 	}
 
 }
 
-func (as Authors) ToBookAuthors() BookAuthors {
-	var authors BookAuthors
+func (as Authors) ToBookAuthors() AuthorsForBook {
+	var authors AuthorsForBook
 	for _, a := range as {
 		authors = append(authors, a.ToBookAuthor())
 	}
@@ -104,8 +104,8 @@ func (as Authors) ToBookAuthors() BookAuthors {
 
 }
 
-func (b Book) ToWebBook() WebBook {
-	return WebBook{
+func (b Book) ToWebBook() ReqWebBook {
+	return ReqWebBook{
 		Title:       b.Title,
 		Year:        strconv.Itoa(b.Year),
 		Description: b.Description,
@@ -123,8 +123,8 @@ func (b Book) ToResWebBook(author Authors) ResWebBook {
 	}
 }
 
-func (b Book) ToAuthorBook() AuthorBook {
-	return AuthorBook{
+func (b Book) ToBookForAuthor() BookForAuthor {
+	return BookForAuthor{
 		BookId:   b.BookId,
 		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
@@ -139,11 +139,11 @@ func (b Book) ToAllWebBook() AllWebBook {
 	}
 }
 
-func (bs Books) ToAuthorBooks() AuthorBooks{
-	var books AuthorBooks
+func (bs Books) ToAuthorBooks() BooksForAuthor {
+	var books BooksForAuthor
 	if &bs != nil {
 		for _, b := range bs {
-			books = append(books, b.ToAuthorBook())
+			books = append(books, b.ToBookForAuthor())
 		}
 		if len(books) > 1 {
 			books.Sort()
@@ -152,14 +152,14 @@ func (bs Books) ToAuthorBooks() AuthorBooks{
 	return books
 }
 
-func (a Author) ToWebAuthor(b Books) WebAuthor {
-	return WebAuthor{
+func (a Author) ToWebAuthor(b Books) ResWebAuthor {
+	return ResWebAuthor{
 		Name:  a.Name,
 		Books: b.ToAuthorBooks(),
 	}
 }
 
-func (w WebAuthor) ToJson() []byte {
+func (w ResWebAuthor) ToJson() []byte {
 	j, err := json.Marshal(w)
 	if err != nil {
 		fmt.Println(err)
