@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pquerna/ffjson/ffjson"
 	"sort"
 	"strconv"
 )
@@ -89,7 +90,7 @@ func (a *ResBooksForAuthor) Sort() {
 }
 
 func (w ReqWebBook) ToJson() []byte {
-	j, err := json.Marshal(w)
+	j, err := ffjson.Marshal(w)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -169,7 +170,7 @@ func (a Author) ToWebAuthor(b Books) ResWebAuthor {
 }
 
 func (w ResWebAuthor) ToJson() []byte {
-	j, err := json.Marshal(w)
+	j, err := ffjson.Marshal(w)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -177,7 +178,7 @@ func (w ResWebAuthor) ToJson() []byte {
 }
 
 func (w ResWebBook) ToJson() []byte {
-	j, err := json.Marshal(w)
+	j, err := ffjson.Marshal(w)
 	if err != nil {
 		fmt.Println(err)
 	}

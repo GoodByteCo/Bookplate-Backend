@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
+	"github.com/pquerna/ffjson/ffjson"
 	"image/jpeg"
 	png2 "image/png"
 	"io"
@@ -179,7 +179,7 @@ func AddReader(add models.ReqReader) (error, usererror error) {
 		return err, nil
 	}
 
-	psPronouns, err := json.Marshal(add.Pronouns)
+	psPronouns, err := ffjson.Marshal(add.Pronouns)
 	if err != nil {
 		return err, nil
 	}
