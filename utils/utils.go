@@ -141,7 +141,7 @@ func CheckIfPresent(email string) (models.Reader, error) {
 //func AddAuthor(add models.Author) error{
 //}
 
-func AddBook(add models.ReqWebBook) error {
+func AddBook(add models.ReqWebBook) (string, error) {
 	fmt.Println(add.Year)
 	db := bdb.Connect()
 	authors := add.Authors
@@ -165,7 +165,7 @@ func AddBook(add models.ReqWebBook) error {
 		DeletedAt:   nil,
 	}
 	book.SetStringId()
-	return db.Create(&book).Association("authors").Append(authors).Error
+	return book.BookId, db.Create(&book).Association("authors").Append(authors).Error
 }
 
 func AddReader(add models.ReqReader) (error, usererror error) {

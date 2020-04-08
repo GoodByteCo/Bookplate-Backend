@@ -18,12 +18,11 @@ import (
 	"gopkg.in/kothar/go-backblaze.v0"
 )
 
-func init() {
-
-}
-
 func Ping(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Pong"))
+	body := "Pong"
+	w.Header().Set("Content-Type", http.DetectContentType([]byte(body)))
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Write([]byte(body))
 }
 
 func UploadBook(w http.ResponseWriter, r *http.Request) {
@@ -56,21 +55,24 @@ func UploadBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(url)
+	w.Header().Set("Content-Type", http.DetectContentType([]byte(url)))
+	w.Header().Add("Accept-Charset", "utf-8")
 	w.Write([]byte(url))
 
 }
 func AddBook(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
 	var book models.ReqWebBook
 	_ = decoder.Decode(&book)
-	err := utils.AddBook(book)
+	id, err := utils.AddBook(book)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	w.Write([]byte("Uploaded"))
+	js, _ := json.Marshal(id)
+	w.Header().Set("Content-Type", http.DetectContentType(js))
+	w.Write(js)
 }
 
 //func AddAuthor(w http.ResponseWriter, r *http.Request){
@@ -79,6 +81,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 //}
 
 func AddReader(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
 	var reader models.ReqReader
 	_ = decoder.Decode(&reader)
@@ -97,6 +100,7 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
 	var loginReader models.LoginReader
 	err := decoder.Decode(&loginReader)
@@ -136,6 +140,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
 	http.SetCookie(w, &http.Cookie{
 		Name:   "jwt",
 		Value:  "",
@@ -146,6 +151,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
 	ctx := r.Context()
 	book, ok := ctx.Value("book").(models.Book)
 	if !ok {
@@ -153,15 +159,15 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	authors, ok := ctx.Value("authors").([]models.Author)
-	fmt.Println(book)
 	webbook := book.ToResWebBook(authors)
 	js := webbook.ToJson()
-	fmt.Println(string(js))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
 
 func GetAuthor(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	ctx := r.Context()
 	author, ok := ctx.Value("author").(models.Author)
 	if !ok {
@@ -173,14 +179,14 @@ func GetAuthor(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
-	fmt.Println(author)
 	webAuthor := author.ToWebAuthor(books)
 	js := webAuthor.ToJson()
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
 
 func GetAllBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	var records []models.Book
 	var webBooks []models.AllWebBook
 	db := bdb.ConnectToBook()
@@ -195,7 +201,6 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
 func getBucket() *backblaze.Bucket {

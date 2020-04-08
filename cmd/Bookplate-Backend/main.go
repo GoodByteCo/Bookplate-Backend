@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/flate"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,6 +21,7 @@ func init() {
 }
 
 func main() {
+	compressor := chimiddleware.NewCompressor(flate.DefaultCompression)
 	r := chi.NewRouter()
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -36,6 +38,7 @@ func main() {
 	r.Use(chimiddleware.RealIP)
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
+	r.Use(compressor.Handler())
 	r.Use(chimiddleware.Timeout(60 * time.Second))
 
 	r.Route("/", func(r chi.Router) {

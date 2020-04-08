@@ -36,15 +36,12 @@ func (b *Book) ToUrlSafe() {
 	reg, _ := regexp.Compile("[^a-zA-Z0-9\\-]+")
 	bookId = reg.ReplaceAllString(bookId, "")
 	b.BookId = bookId
-	fmt.Println(b.BookId)
 }
 
 //Find if Book Id exist and append number if so
 func (b *Book) SetStringId() {
 	db := bdb.ConnectToBook()
-	fmt.Println(b.Title)
 	b.ToUrlSafe()
-	fmt.Println(b.BookId)
 	emptyBook := Book{}
 	val := 1
 	orginalId := b.BookId
