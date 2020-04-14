@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -128,9 +129,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(tokenString)
 		http.SetCookie(w, &http.Cookie{
+			Name:"user_id",
+			Value: strconv.Itoa(int(reader.ID)),
+			Expires: expiry,
+		})
+		http.SetCookie(w, &http.Cookie{
 			Name:    "jwt",
 			Value:   tokenString,
 			Expires: expiry,
+			HttpOnly: true,
+			//Domain: "bookplate.co", //add when correct
 		})
 		w.Write([]byte("we did it"))
 	} else {

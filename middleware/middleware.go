@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"context"
-	"net/http"
-
 	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
+	"net/http"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/go-chi/chi"
@@ -37,3 +39,31 @@ func AuthorCtx(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func LoginWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, claims, err := jwtauth.FromContext(r.Context())
+
+		if err != nil {
+			next.ServeHTTP(w,r)
+			return
+		}
+
+		issb := token.Claims.(jwt.MapClaims).VerifyIssuer(utils.Issuer, false)
+		if !issb {
+			next.ServeHTTP(w,r)
+			return
+		}
+
+		if token == nil || !token.Valid {
+			next.ServeHTTP(w,r)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "reader_id", claims["reader_id"])
+		//get claims
+		// Token is authenticated, pass it through
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+
