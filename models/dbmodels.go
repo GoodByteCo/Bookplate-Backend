@@ -21,6 +21,7 @@ type Book struct {
 	Year        int    `json:"year"`
 	Description string `gorm:"type:text"`
 	CoverUrl    string
+	BookColor   string
 	ReaderID    uint
 	CreatedAt   time.Time  `json:"-"`
 	UpdatedAt   time.Time  `json:"-"`
@@ -106,6 +107,12 @@ func (a *Author) SetStringId() {
 	}
 }
 
+type NameSearch struct {
+	BookAndAuthor string
+	Author        Author
+	Book          Book
+}
+
 //Migration Function Update as database structs change
 func Start(db *gorm.DB) error {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
@@ -158,6 +165,29 @@ func Start(db *gorm.DB) error {
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return tx.DropTable(&Reader{}, Author{}, &Book{}).Error
+			},
+		},
+		{
+			ID: "Add Color",
+			Migrate: func(tx *gorm.DB) error {
+				type Book struct {
+					ID          uint   `gorm:"primary_key" json:"-"`
+					BookId      string `gorm:"unique"`
+					Title       string `json:"title"`
+					Year        int    `json:"year"`
+					Description string `gorm:"type:text"`
+					CoverUrl    string
+					BookColor   string
+					ReaderID    uint
+					CreatedAt   time.Time  `json:"-"`
+					UpdatedAt   time.Time  `json:"-"`
+					DeletedAt   *time.Time `sql:"index" json:"-"`
+					Authors     []Author   `gorm:"many2many:book_authors;"`
+				}
+				return tx.AutoMigrate(&Book{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.DropColumn("BookColor").Error
 			},
 		},
 	})

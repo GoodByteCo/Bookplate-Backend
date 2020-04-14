@@ -43,6 +43,7 @@ type ResWebBook struct {
 	Authors     ResAuthorsForBook `json:"authors"`
 	Description string            `json:"description"`
 	CoverUrl    string            `json:"cover_url"`
+	BookColor   string            `json:"book_color"`
 }
 
 //Book data for author request
@@ -51,6 +52,7 @@ type ResBookForAuthor struct {
 	Year     int    `json:"-"`
 	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
+	BookColor string `json:"book_color"`
 }
 
 //Author data to respond to request for author
@@ -82,6 +84,7 @@ type AllWebBook struct {
 	BookId   string `json:"book_id"`
 	Title    string `json:"title"`
 	CoverUrl string `json:"cover_url"`
+	BookColor string `json:"book_color"`
 }
 
 func (a *ResBooksForAuthor) Sort() {
@@ -129,6 +132,7 @@ func (b Book) ToResWebBook(author Authors) ResWebBook {
 		Authors:     author.ToBookAuthors(),
 		Description: b.Description,
 		CoverUrl:    b.CoverUrl,
+		BookColor:   b.BookColor,
 	}
 }
 
@@ -137,6 +141,7 @@ func (b Book) ToBookForAuthor() ResBookForAuthor {
 		BookId:   b.BookId,
 		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
+		BookColor: b.BookColor,
 	}
 }
 
@@ -145,6 +150,7 @@ func (b Book) ToAllWebBook() AllWebBook {
 		BookId:   b.BookId,
 		Title:    b.Title,
 		CoverUrl: b.CoverUrl,
+		BookColor: b.BookColor,
 	}
 }
 
