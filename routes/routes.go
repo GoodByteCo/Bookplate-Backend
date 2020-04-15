@@ -17,7 +17,6 @@ import (
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
-	"github.com/gorilla/schema"
 )
 
 var replace = "https://photos.bookplate.co"
@@ -132,14 +131,9 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	decoder := schema.NewDecoder()
+	decoder := json.NewDecoder(r.Body)
 	var loginReader models.LoginReader
-	err = decoder.Decode(&loginReader, r.PostForm)
+	err := decoder.Decode(&loginReader)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

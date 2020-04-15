@@ -50,10 +50,6 @@ func main() {
 		r.Group(func(r chi.Router) {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
-
-		})
-		r.Group(func (r chi.Router) {
-			r.Use(chimiddleware.AllowContentType("application/x-www-form-urlencoded"))
 			r.Post("/login", routes.Login)
 		})
 
