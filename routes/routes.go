@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -132,6 +133,11 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
+	scanner := bufio.NewScanner(resp.Body)
+	scanner.Split(bufio.ScanBytes)
+	for scanner.Scan() {
+		fmt.Print(scanner.Text())
+	}
 	var loginReader models.LoginReader
 	err := decoder.Decode(&loginReader)
 	if err != nil {
