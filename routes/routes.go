@@ -20,6 +20,9 @@ import (
 	"github.com/gorilla/schema"
 )
 
+var replace = "https://photos.bookplate.co"
+var start = "https://f001.backblazeb2.com"
+
 func Ping(w http.ResponseWriter, r *http.Request) {
 	body := "Pong"
 	w.Header().Set("Content-Type", http.DetectContentType([]byte(body)))
@@ -59,6 +62,7 @@ func UploadBook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", http.DetectContentType([]byte(url)))
 	w.Header().Add("Accept-Charset", "utf-8")
+	url = strings.ReplaceAll(url, start, replace)
 	w.Write([]byte(url))
 
 }
