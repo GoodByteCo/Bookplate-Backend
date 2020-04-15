@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -59,6 +60,7 @@ func LoginWare(next http.Handler) http.Handler {
 			next.ServeHTTP(w,r)
 			return
 		}
+		fmt.Println(claims["reader_id"])
 		ctx := context.WithValue(r.Context(), "reader_id", claims["reader_id"])
 		//get claims
 		// Token is authenticated, pass it through
