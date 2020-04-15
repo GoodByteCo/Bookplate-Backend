@@ -3,6 +3,8 @@ package main
 import (
 	"compress/flate"
 	"fmt"
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
+	"github.com/go-chi/jwtauth"
 	"net/http"
 	"time"
 
@@ -40,16 +42,14 @@ func main() {
 	r.Use(chimiddleware.Recoverer)
 	r.Use(compressor.Handler())
 	r.Use(chimiddleware.Timeout(60 * time.Second))
-
+	r.Use(jwtauth.Verifier(utils.TokenAuth))
+	r.Use(middleware.LoginWare)
 	r.Route("/", func(r chi.Router) {
 		r.Get("/books", routes.GetAllBooks)
 		r.Get("/logout", routes.Logout)
 		//r.Get("/auth", auth.Auth)
 		//r.Get("/auth/callback", auth.AuthCallback)
-		r.Group(func (r chi.Router) {
-			r.Use(middleware.LoginWare)
-			r.Get("/ping", routes.Ping)
-		})
+		r.Get("/ping", routes.Ping)
 		r.Group(func(r chi.Router) {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
