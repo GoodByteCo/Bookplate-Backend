@@ -143,6 +143,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+	fmt.Println(loginReader)
 	fmt.Println(loginReader.Email)
 	reader, err := utils.CheckIfPresent(loginReader.Email)
 	if err != nil {
