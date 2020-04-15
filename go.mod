@@ -15,6 +15,7 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/readahead v0.0.0-20161222183148-eaceba169032 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/gorilla/schema v1.1.0
 	github.com/gorilla/sessions v1.2.0 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/lib/pq v1.3.0

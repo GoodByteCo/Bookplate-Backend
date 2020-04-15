@@ -23,8 +23,8 @@ type Pronoun struct {
 
 //Reader gotten from login request
 type LoginReader struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" scheme:"email"`
+	Password string `json:"password" scheme:"email"`
 }
 
 //Book Info gotten from request to add book

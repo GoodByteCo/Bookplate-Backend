@@ -17,6 +17,7 @@ import (
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"gopkg.in/kothar/go-backblaze.v0"
+	"github.com/gorilla/schema"
 )
 
 func Ping(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +87,7 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var reader models.ReqReader
 	_ = decoder.Decode(&reader)
-	err, userExist := utils.AddReader(reader)
+	id, err, userExist := utils.AddReader(reader)
 	if err != nil {
 		//do something
 		http.Error(w, http.StatusText(500)+": Server Error", 500)
@@ -96,15 +97,45 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 		return
 
 		//do something
+	} else {
+		expiry := time.Now().Add(time.Hour * 12)
+		mc := jwt.MapClaims{"reader_id": id, "iss": utils.Issuer}
+		jwtauth.SetIssuedNow(mc)
+		jwtauth.SetExpiry(mc, expiry)
+		_, tokenString, tokenErr := utils.TokenAuth.Encode(mc)
+		if tokenErr != nil {
+			fmt.Println("token Generated Error")
+			http.Error(w, http.StatusText(500)+": "+tokenErr.Error(), 500)
+			return
+		}
+		fmt.Println(tokenString)
+		http.SetCookie(w, &http.Cookie{
+			Name:"user_id",
+			Value: strconv.Itoa(int(id)),
+			Expires: expiry,
+		})
+		http.SetCookie(w, &http.Cookie{
+			Name:    "jwt",
+			Value:   tokenString,
+			Expires: expiry,
+			HttpOnly: true,
+			Domain: "bookplate.co", //add when correct
+		})
+		w.Write([]byte("user added"))
 	}
-	w.Write([]byte("user added"))
+
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
-	decoder := json.NewDecoder(r.Body)
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	decoder := schema.NewDecoder()
 	var loginReader models.LoginReader
-	err := decoder.Decode(&loginReader)
+	err = decoder.Decode(&loginReader, r.PostForm)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -138,7 +169,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Value:   tokenString,
 			Expires: expiry,
 			HttpOnly: true,
-			//Domain: "bookplate.co", //add when correct
+			Domain: "bookplate.co", //add when correct
 		})
 		w.Write([]byte("we did it"))
 	} else {

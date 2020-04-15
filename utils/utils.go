@@ -168,20 +168,20 @@ func AddBook(add models.ReqWebBook) (string, error) {
 	return book.BookId, db.Create(&book).Association("authors").Append(authors).Error
 }
 
-func AddReader(add models.ReqReader) (error, usererror error) {
+func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
 	if !noUser {
-		return nil, UserExistError{add.Email}
+		return 0,nil, UserExistError{add.Email}
 	}
 	passwordHash, err := HashAndSalt(add.Password)
 	if err != nil {
-		return err, nil
+		return 0, err, nil
 	}
 
 	psPronouns, err := ffjson.Marshal(add.Pronouns)
 	if err != nil {
-		return err, nil
+		return 0, err, nil
 	}
 	pronouns := postgres.Jsonb{RawMessage: psPronouns}
 	db := bdb.ConnectToReader()
@@ -198,9 +198,10 @@ func AddReader(add models.ReqReader) (error, usererror error) {
 		Plural:        false,
 	}
 	if dbc := db.Create(&reader); dbc.Error != nil {
-		return dbc.Error, nil
+		return 0, dbc.Error, nil
 	}
-	return nil, nil
+
+	return reader.ID, nil, nil
 }
 
 func GetReaderFromDB(emailHash int64) (models.Reader, bool) {
