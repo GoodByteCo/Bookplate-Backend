@@ -159,20 +159,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(tokenString)
 		http.SetCookie(w, &http.Cookie{
-			Name:"user_id",
-			Value: strconv.Itoa(int(reader.ID)),
-			Expires: expiry,
-		})
-		http.SetCookie(w, &http.Cookie{
 			Name:    "jwt",
 			Value:   tokenString,
 			Expires: expiry,
 			HttpOnly: true,
 			Domain: "bookplate.co", //add when correct
 		})
-		w.Write([]byte("we did it"))
+		js := fmt.Sprintf("{ reader_id: %v, expiry: %s }", reader.ID, expiry.String())
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(js))
 	} else {
-		w.Write([]byte("wrong password"))
+		js := fmt.Sprintf("{ error: error, reason: wrongPassword }")
+		w.Write([]byte(js))
 	}
 
 }
@@ -183,6 +181,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Name:   "jwt",
 		Value:  "",
 		MaxAge: -1,
+		HttpOnly: true,
 	})
 
 	w.Write([]byte("Logged Out"))
