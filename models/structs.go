@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
-	"github.com/pquerna/ffjson/ffjson"
 	"sort"
 	"strconv"
+
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 //Reader gotten from Request to add reader
@@ -48,10 +49,10 @@ type ResWebBook struct {
 
 //Book data for author request
 type ResBookForAuthor struct {
-	BookId   string `json:"book_id"`
-	Year     int    `json:"-"`
-	Title    string `json:"title"`
-	CoverUrl string `json:"cover_url"`
+	BookId    string `json:"book_id"`
+	Year      int    `json:"-"`
+	Title     string `json:"title"`
+	CoverUrl  string `json:"cover_url"`
 	BookColor string `json:"book_color"`
 }
 
@@ -81,9 +82,9 @@ type ResBooksForAuthor []ResBookForAuthor
 
 //Info when asking for all books
 type AllWebBook struct {
-	BookId   string `json:"book_id"`
-	Title    string `json:"title"`
-	CoverUrl string `json:"cover_url"`
+	BookId    string `json:"book_id"`
+	Title     string `json:"title"`
+	CoverUrl  string `json:"cover_url"`
 	BookColor string `json:"book_color"`
 }
 
@@ -121,7 +122,7 @@ func (b Book) ToWebBook() ReqWebBook {
 		Title:       b.Title,
 		Year:        strconv.Itoa(b.Year),
 		Description: b.Description,
-		CoverUrl:    b.CoverUrl,
+		CoverUrl:    b.CoverURL,
 	}
 }
 
@@ -131,25 +132,25 @@ func (b Book) ToResWebBook(author Authors) ResWebBook {
 		Year:        strconv.Itoa(b.Year),
 		Authors:     author.ToBookAuthors(),
 		Description: b.Description,
-		CoverUrl:    b.CoverUrl,
+		CoverUrl:    b.CoverURL,
 		BookColor:   b.BookColor,
 	}
 }
 
 func (b Book) ToBookForAuthor() ResBookForAuthor {
 	return ResBookForAuthor{
-		BookId:   b.BookId,
-		Title:    b.Title,
-		CoverUrl: b.CoverUrl,
+		BookId:    b.BookID,
+		Title:     b.Title,
+		CoverUrl:  b.CoverURL,
 		BookColor: b.BookColor,
 	}
 }
 
 func (b Book) ToAllWebBook() AllWebBook {
 	return AllWebBook{
-		BookId:   b.BookId,
-		Title:    b.Title,
-		CoverUrl: b.CoverUrl,
+		BookId:    b.BookID,
+		Title:     b.Title,
+		CoverUrl:  b.CoverURL,
 		BookColor: b.BookColor,
 	}
 }

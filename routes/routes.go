@@ -98,35 +98,31 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 	if userExist != nil {
 		w.Write([]byte("user exists"))
 		return
-
-		//do something
-	} else {
-		expiry := time.Now().Add(time.Hour * 12)
-		mc := jwt.MapClaims{"reader_id": id, "iss": utils.Issuer}
-		jwtauth.SetIssuedNow(mc)
-		jwtauth.SetExpiry(mc, expiry)
-		_, tokenString, tokenErr := utils.TokenAuth.Encode(mc)
-		if tokenErr != nil {
-			fmt.Println("token Generated Error")
-			http.Error(w, http.StatusText(500)+": "+tokenErr.Error(), 500)
-			return
-		}
-		fmt.Println(tokenString)
-		http.SetCookie(w, &http.Cookie{
-			Name:"user_id",
-			Value: strconv.Itoa(int(id)),
-			Expires: expiry,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:    "jwt",
-			Value:   tokenString,
-			Expires: expiry,
-			HttpOnly: true,
-			Domain: "bookplate.co", //add when correct
-		})
-		w.Write([]byte("user added"))
 	}
-
+	expiry := time.Now().Add(time.Hour * 12)
+	mc := jwt.MapClaims{"reader_id": id, "iss": utils.Issuer}
+	jwtauth.SetIssuedNow(mc)
+	jwtauth.SetExpiry(mc, expiry)
+	_, tokenString, tokenErr := utils.TokenAuth.Encode(mc)
+	if tokenErr != nil {
+		fmt.Println("token Generated Error")
+		http.Error(w, http.StatusText(500)+": "+tokenErr.Error(), 500)
+		return
+	}
+	fmt.Println(tokenString)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "user_id",
+		Value:   strconv.Itoa(int(id)),
+		Expires: expiry,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    tokenString,
+		Expires:  expiry,
+		HttpOnly: true,
+		Domain:   "bookplate.co", //add when correct
+	})
+	w.Write([]byte("user added"))
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -159,11 +155,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(tokenString)
 		http.SetCookie(w, &http.Cookie{
-			Name:    "jwt",
-			Value:   tokenString,
-			Expires: expiry,
+			Name:     "jwt",
+			Value:    tokenString,
+			Expires:  expiry,
 			HttpOnly: true,
-			Domain: "bookplate.co", //add when correct
+			SameSite: http.SameSiteLaxMode,
+			Domain:   "bookplate.co", //add when correct
 		})
 		js := fmt.Sprintf("{ reader_id: %v, expiry: %s }", reader.ID, expiry.String())
 		w.Header().Set("Content-Type", "application/json")
@@ -178,9 +175,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	http.SetCookie(w, &http.Cookie{
-		Name:   "jwt",
-		Value:  "",
-		MaxAge: -1,
+		Name:     "jwt",
+		Value:    "",
+		MaxAge:   -1,
 		HttpOnly: true,
 	})
 
@@ -190,12 +187,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 func GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	ctx := r.Context()
-	book, ok := ctx.Value("book").(models.Book)
+	book, ok := ctx.Value(utils.BookKey).(models.Book)
 	if !ok {
 		//errpr
 		return
 	}
-	authors, ok := ctx.Value("authors").([]models.Author)
+	authors, ok := ctx.Value(utils.AuthorKey).([]models.Author)
 	webbook := book.ToResWebBook(authors)
 	js := webbook.ToJson()
 	w.Header().Set("Content-Type", "application/json")
@@ -206,12 +203,12 @@ func GetAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	w.Header().Set("Content-Type", "application/json")
 	ctx := r.Context()
-	author, ok := ctx.Value("author").(models.Author)
+	author, ok := ctx.Value(utils.AuthorKey).(models.Author)
 	if !ok {
 		//errpr
 		return
 	}
-	books, ok := ctx.Value("books").([]models.Book)
+	books, ok := ctx.Value(utils.BookKey).([]models.Book)
 	if !ok {
 		//errpr
 		return

@@ -16,11 +16,11 @@ import (
 //Book type for database
 type Book struct {
 	ID          uint   `gorm:"primary_key" json:"-"`
-	BookId      string `gorm:"unique"`
+	BookID      string `gorm:"unique"`
 	Title       string `json:"title"`
 	Year        int    `json:"year"`
 	Description string `gorm:"type:text"`
-	CoverUrl    string
+	CoverURL    string
 	BookColor   string
 	ReaderID    uint
 	CreatedAt   time.Time  `json:"-"`
@@ -29,26 +29,26 @@ type Book struct {
 	Authors     []Author   `gorm:"many2many:book_authors;"`
 }
 
-//Remove non url safe characters from book title and set it as Id
+//ToUrlSafe Remove non url safe characters from book title and set it as Id
 func (b *Book) ToUrlSafe() {
-	bookId := b.Title
-	bookId = strings.ToLower(bookId)
-	bookId = strings.ReplaceAll(bookId, " ", "-")
+	bookID := b.Title
+	bookID = strings.ToLower(bookID)
+	bookID = strings.ReplaceAll(bookID, " ", "-")
 	reg, _ := regexp.Compile("[^a-zA-Z0-9\\-]+")
-	bookId = reg.ReplaceAllString(bookId, "")
-	b.BookId = bookId
+	bookID = reg.ReplaceAllString(bookID, "")
+	b.BookID = bookID
 }
 
-//Find if Book Id exist and append number if so
+//SetStringId Find if Book Id exist and append number if so
 func (b *Book) SetStringId() {
 	db := bdb.ConnectToBook()
 	b.ToUrlSafe()
 	emptyBook := Book{}
 	val := 1
-	orginalId := b.BookId
-	for !db.Where(Book{BookId: b.BookId}).Find(&emptyBook).RecordNotFound() {
-		b.BookId = fmt.Sprintf("%s%d", orginalId, val)
-		val += 1
+	orginalId := b.BookID
+	for !db.Where(Book{BookID: b.BookID}).Find(&emptyBook).RecordNotFound() {
+		b.BookID = fmt.Sprintf("%s%d", orginalId, val)
+		val++
 		emptyBook = Book{}
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/pquerna/ffjson/ffjson"
 	"image/jpeg"
 	png2 "image/png"
 	"io"
@@ -13,6 +12,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/pquerna/ffjson/ffjson"
 
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/dgrijalva/jwt-go"
@@ -26,6 +27,14 @@ import (
 
 	"github.com/AvraamMavridis/randomcolor"
 	"github.com/cespare/xxhash"
+)
+
+type key string
+
+const (
+	ReaderKey key = "reader_id"
+	AuthorKey key = "author"
+	BookKey   key = "book"
 )
 
 var TokenAuth *jwtauth.JWTAuth
@@ -154,25 +163,25 @@ func AddBook(add models.ReqWebBook) (string, error) {
 	year, _ := strconv.Atoi(add.Year)
 	fmt.Println(add.Authors)
 	book := models.Book{
-		BookId:      "",
+		BookID:      "",
 		Title:       add.Title,
 		Year:        year,
 		Description: add.Description,
-		CoverUrl:    add.CoverUrl,
+		CoverURL:    add.CoverUrl,
 		ReaderID:    0, //do thing where i get reader added
 		CreatedAt:   time.Time{},
 		UpdatedAt:   time.Time{},
 		DeletedAt:   nil,
 	}
 	book.SetStringId()
-	return book.BookId, db.Create(&book).Association("authors").Append(authors).Error
+	return book.BookID, db.Create(&book).Association("authors").Append(authors).Error
 }
 
 func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
 	if !noUser {
-		return 0,nil, UserExistError{add.Email}
+		return 0, nil, UserExistError{add.Email}
 	}
 	passwordHash, err := HashAndSalt(add.Password)
 	if err != nil {
