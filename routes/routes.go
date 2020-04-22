@@ -142,7 +142,7 @@ func AddToList(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		return
 	}
-	if listAdd.List != "read" || listAdd.List != "to_read" || listAdd.List != "library" || listAdd.List != "liked" {
+	if listAdd.List != "read" && listAdd.List != "to_read" && listAdd.List != "library" && listAdd.List != "liked" {
 		http.Error(w, "cant add to list", 300)
 		return
 
