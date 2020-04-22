@@ -237,6 +237,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 
 func GetReaderBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	bookID := chi.URLParam(r, "bookID")
 	ctx := r.Context()
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
@@ -247,7 +248,12 @@ func GetReaderBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "not logged in", 401)
 	}
 	list := utils.GetReaderBook(id, bookID)
-	fmt.Println(list)
+	js, err := json.Marshal(list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+
 }
 
 func GetAuthor(w http.ResponseWriter, r *http.Request) {
