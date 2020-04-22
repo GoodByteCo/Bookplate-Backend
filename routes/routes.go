@@ -161,13 +161,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 			Domain:   "bookplate.co", //add when correct
+			Secure:   true,
 		})
-		js := fmt.Sprintf("{ reader_id: %v, expiry: %s }", reader.ID, expiry.String())
-		w.Header().Set("Content-Type", "application/json")
+		js := fmt.Sprintf("%v", reader.ID)
+		w.Header().Set("Content-Type", http.DetectContentType([]byte(js)))
 		w.Write([]byte(js))
 	} else {
-		js := fmt.Sprintf("{ error: error, reason: wrongPassword }")
-		w.Write([]byte(js))
+		http.Error(w, "wrong password", 401)
 	}
 
 }
