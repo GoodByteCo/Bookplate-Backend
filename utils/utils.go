@@ -26,7 +26,6 @@ import (
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 
 	"github.com/AvraamMavridis/randomcolor"
-	sq "github.com/Masterminds/squirrel"
 	"github.com/cespare/xxhash"
 )
 
@@ -150,17 +149,8 @@ func CheckIfPresent(email string) (models.Reader, error) {
 
 func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
-	setUpdate := fmt.Sprintf("%s || '%s'", listAdd.List, listAdd.BookID)
-	sql, test, err := psql.Update("reader").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
-	fmt.Println(test)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	fmt.Println(sql)
-
+	db = db.Exec("UPDATE readers SET ? = ? || '?' WHERE ID = ?", listAdd.List, listAdd.List, listAdd.BookID, reader_id)
 	// db = db.Exec(sql)
 	return db.Error
 }
