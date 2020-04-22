@@ -125,7 +125,7 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("user added"))
 }
 
-func AddToLibrary(w http.ResponseWriter, r *http.Request) {
+func AddToList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	ctx := r.Context()
 	id, ok := ctx.Value(utils.ReaderKey).(uint)

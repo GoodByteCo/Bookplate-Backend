@@ -3,10 +3,11 @@ package main
 import (
 	"compress/flate"
 	"fmt"
-	"github.com/GoodByteCo/Bookplate-Backend/utils"
-	"github.com/go-chi/jwtauth"
 	"net/http"
 	"time"
+
+	"github.com/GoodByteCo/Bookplate-Backend/utils"
+	"github.com/go-chi/jwtauth"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 
@@ -54,6 +55,7 @@ func main() {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
 			r.Post("/login", routes.Login)
+			r.Post("/add/list", routes.AddToList)
 		})
 
 		r.Route("/author", func(r chi.Router) {
