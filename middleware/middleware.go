@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -51,6 +52,19 @@ func LoginWare(next http.Handler) http.Handler {
 			return
 		}
 
+		err = claims.Valid()
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+		switch exp := claims["exp"].(type) {
+		case float64:
+			fmt.Println(exp)
+		case json.Number:
+			fmt.Print("json: expiry")
+			fmt.Println(exp)
+		}
+
 		issb := token.Claims.(jwt.MapClaims).VerifyIssuer(utils.Issuer, false)
 		if !issb {
 			next.ServeHTTP(w, r)
@@ -61,6 +75,7 @@ func LoginWare(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+
 		fmt.Println(claims["reader_id"])
 		ctx := context.WithValue(r.Context(), utils.BookKey, claims["reader_id"])
 		//get claims
