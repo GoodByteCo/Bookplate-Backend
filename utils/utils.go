@@ -153,6 +153,7 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	setUpdate := fmt.Sprintf("%s || '%s'", listAdd.List, listAdd.BookID)
+	fmt.Println(setUpdate)
 	sql, test, err := psql.Update("reader").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
 	fmt.Println(test)
 	if err != nil {
@@ -161,7 +162,7 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	}
 	fmt.Println(sql)
 
-	// db = db.Exec(sql)
+	db = db.Exec(sql, setUpdate, reader_id)
 	return db.Error
 }
 
