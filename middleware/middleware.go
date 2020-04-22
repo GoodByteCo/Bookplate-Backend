@@ -78,7 +78,8 @@ func LoginWare(next http.Handler) http.Handler {
 
 		fmt.Println(claims["reader_id"])
 		tID := claims["reader_id"]
-		readerID := tID.(uint)
+		tempReaderID := tID.(float64)
+		readerID := uint(tempReaderID)
 		ctx := context.WithValue(r.Context(), utils.BookKey, readerID)
 		//get claims
 		// Token is authenticated, pass it through
