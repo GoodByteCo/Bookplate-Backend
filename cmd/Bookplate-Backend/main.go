@@ -65,6 +65,12 @@ func main() {
 			})
 		})
 
+		r.Route("/reader", func(r chi.Router) {
+			r.Route("/book", func(r chi.Router) {
+				r.Get("/{bookID}", routes.GetReaderBook)
+			})
+		})
+
 		r.Route("/book", func(r chi.Router) {
 			r.Post("/add", routes.AddBook)
 			r.Route("/{bookID}", func(r chi.Router) {

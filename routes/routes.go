@@ -12,6 +12,7 @@ import (
 
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
@@ -232,6 +233,21 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	js := webbook.ToJson()
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func GetReaderBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	bookID := chi.URLParam(r, "bookID")
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	if id == 0 {
+		http.Error(w, "not logged in", 401)
+	}
+	list := utils.GetReaderBook(id, bookID)
+	fmt.Println(list)
 }
 
 func GetAuthor(w http.ResponseWriter, r *http.Request) {

@@ -42,6 +42,29 @@ type ReqBookListAdd struct {
 	BookID string `json:"book_id"`
 }
 
+type InternalInList struct {
+	Read    bool `json:"read"`
+	Liked   bool `json:"liked"`
+	ToRead  bool `json:"to_read"`
+	Library bool `json:"library"`
+}
+
+type ReqInList struct {
+	Read    bool    `json:"read"`
+	Liked   bool    `json:"liked"`
+	ToRead  bool    `json:"to_read"`
+	Library bool    `json:"library"`
+	Friends Friends `json:"friends"`
+}
+
+type Friend struct {
+	ID           uint   `json:"id"`
+	Name         string `json:"name"`
+	ProfileColor string `json:"profile_color"`
+}
+
+type Friends []Friend
+
 //Book info sent to site
 type ResWebBook struct {
 	Title       string            `json:"title"`

@@ -10,6 +10,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -249,4 +250,55 @@ func StringWithCharset(length int, charset string) string {
 
 func String(length int) string {
 	return StringWithCharset(length, charset)
+}
+
+func GetReaderBook(id uint, book_id string) models.ReqInList {
+	db := bdb.Connect()
+	var reader models.Reader
+	db.Where(&models.Reader{ID: id}).First(&reader)
+	sort.Strings(reader.Library)
+	sort.Strings(reader.Read)
+	sort.Strings(reader.ToRead)
+	sort.Strings(reader.Liked)
+	inList := models.InternalInList{
+		Read:    binarySearch(book_id, reader.Read),
+		Liked:   binarySearch(book_id, reader.Liked),
+		ToRead:  binarySearch(book_id, reader.ToRead),
+		Library: binarySearch(book_id, reader.Library),
+	}
+	var in models.Friends
+	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select friends from reader where ID = $1) vtable on readers.id = ANY (vtable.friends) WHERE readers.library @> ARRAY['$2']::VARCHAR[]", id, book_id).Scan(&in)
+	fmt.Println(inList)
+	fmt.Println(in)
+
+	finalList := models.ReqInList{
+		Read:    inList.Read,
+		Liked:   inList.Liked,
+		ToRead:  inList.ToRead,
+		Library: inList.Library,
+		Friends: in,
+	}
+	return finalList
+}
+
+func binarySearch(searchWord string, list []string) bool {
+
+	low := 0
+	high := len(list) - 1
+
+	for low <= high {
+		median := (low + high) / 2
+
+		if list[median] < searchWord {
+			low = median + 1
+		} else {
+			high = median - 1
+		}
+	}
+
+	if low == len(list) || list[low] != searchWord {
+		return false
+	}
+
+	return true
 }
