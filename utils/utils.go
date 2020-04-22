@@ -147,12 +147,10 @@ func CheckIfPresent(email string) (models.Reader, error) {
 	return reader, nil
 }
 
-//func AddAuthor(add models.Author) error{
-//}
-
 func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
-	db = db.Exec("UPDATE readers SET ? = array_append(?,'?') WHERE ID = ?", listAdd.List, listAdd.List, listAdd.BookID, reader_id)
+
+	db = db.Exec("UPDATE reader SET ? = ? || '?' WHERE ID = ?;", listAdd.List, listAdd.List, listAdd.BookID, reader_id)
 	return db.Error
 }
 
