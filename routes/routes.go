@@ -80,11 +80,6 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-//func AddAuthor(w http.ResponseWriter, r *http.Request){
-//	decoder := json.NewDecoder(r.body)
-//
-//}
-
 func AddReader(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
@@ -168,6 +163,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(js))
 	} else {
 		http.Error(w, "wrong password", 401)
+		w.Write([]byte("No User"))
 	}
 
 }
@@ -189,7 +185,7 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	book, ok := ctx.Value(utils.BookKey).(models.Book)
 	if !ok {
-		//errpr
+		http.Error(w, "book not found", 404)
 		return
 	}
 	authors, ok := ctx.Value(utils.AuthorKey).([]models.Author)
