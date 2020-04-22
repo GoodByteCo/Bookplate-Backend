@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
@@ -161,7 +162,9 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 		return err
 	}
 	fmt.Println(sql)
-	db = db.Exec(sql, setUpdate, reader_id)
+	sql = strings.Replace(sql, "$1", setUpdate, 1)
+	sql = strings.Replace(sql, "$2", "$1", 1)
+	db = db.Exec(sql, reader_id)
 	return db.Error
 }
 
