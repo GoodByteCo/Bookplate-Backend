@@ -154,14 +154,13 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 
 	setUpdate := fmt.Sprintf("%s || '%s'", listAdd.List, listAdd.BookID)
 	fmt.Println(setUpdate)
-	sql, test, err := psql.Update("reader").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
+	sql, test, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
 	fmt.Println(test)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
 	fmt.Println(sql)
-
 	db = db.Exec(sql, setUpdate, reader_id)
 	return db.Error
 }
