@@ -169,6 +169,25 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	return db.Error
 }
 
+func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
+	db := bdb.ConnectToBook()
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+
+	setUpdate := fmt.Sprintf("array_remove(%s, '%s')", listAdd.List, listAdd.BookID)
+	fmt.Println(setUpdate)
+	sql, test, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
+	fmt.Println(test)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	sql = strings.Replace(sql, "$1", setUpdate, 1)
+	sql = strings.Replace(sql, "$2", "$1", 1)
+	db = db.Exec(sql, reader_id)
+	fmt.Println(sql)
+	return db.Error
+}
+
 func AddBook(add models.ReqWebBook, reader_id uint) (string, error) {
 	fmt.Println(add.Year)
 	db := bdb.Connect()

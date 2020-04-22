@@ -156,6 +156,35 @@ func AddToList(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
+func DeleteFromList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	if id == 0 {
+		http.Error(w, "not logged in", 401)
+	}
+	decoder := json.NewDecoder(r.Body)
+	var listAdd models.ReqBookListAdd
+	err := decoder.Decode(&listAdd)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if listAdd.List != "read" && listAdd.List != "to_read" && listAdd.List != "library" && listAdd.List != "liked" {
+		http.Error(w, "cant remove to list", 300)
+		return
+	}
+	err = utils.DeleteFromBookList(id, listAdd)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("success")))
+	w.Write([]byte("success"))
+}
+
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)

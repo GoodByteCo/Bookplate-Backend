@@ -55,7 +55,10 @@ func main() {
 			r.Use(chimiddleware.AllowContentType("application/json"))
 			r.Post("/reader/add", routes.AddReader)
 			r.Post("/login", routes.Login)
-			r.Post("/add/list", routes.AddToList)
+			r.Route("/list", func(r chi.Router) {
+				r.Post("/add", routes.AddToList)
+				r.Post("/remove", routes.DeleteFromList)
+			})
 		})
 
 		r.Route("/author", func(r chi.Router) {
