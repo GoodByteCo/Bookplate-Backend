@@ -65,6 +65,7 @@ type Reader struct {
 	Library       pq.StringArray `gorm:"type:varchar(64)[]"`
 	ToRead        pq.StringArray `gorm:"type:varchar(64)[]"`
 	Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
+	Read          pq.StringArray `gorm:"type:varchar(64)[]"`
 	Friends       pq.Int64Array  `gorm:"type:integer[]"`
 	PasswordHash  string
 	EmailHash     int64
@@ -187,7 +188,34 @@ func Start(db *gorm.DB) error {
 				return tx.AutoMigrate(&Book{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
-				return tx.DropColumn("BookColor").Error
+				return tx.DropColumn("book_color").Error
+			},
+		},
+		{
+			ID: "Add Read",
+			Migrate: func(tx *gorm.DB) error {
+				type Reader struct {
+					ID            uint       `gorm:"primary_key" json:"-"`
+					CreatedAt     time.Time  `json:"-"`
+					UpdatedAt     time.Time  `json:"-"`
+					DeletedAt     *time.Time `sql:"index" json:"-"`
+					Name          string
+					Pronouns      postgres.Jsonb
+					ProfileColour string
+					Library       pq.StringArray `gorm:"type:varchar(64)[]"`
+					ToRead        pq.StringArray `gorm:"type:varchar(64)[]"`
+					Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
+					Read          pq.StringArray `gorm:"type:varchar(64)[]"`
+					Friends       pq.Int64Array  `gorm:"type:integer[]"`
+					PasswordHash  string
+					EmailHash     int64
+					Plural        bool
+					Books         []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
+				}
+				return tx.AutoMigrate(&Reader{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.DropColumn("read").Error
 			},
 		},
 	})

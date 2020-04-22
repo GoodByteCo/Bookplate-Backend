@@ -68,14 +68,19 @@ func UploadBook(w http.ResponseWriter, r *http.Request) {
 func AddBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
 	var book models.ReqWebBook
 	_ = decoder.Decode(&book)
-	id, err := utils.AddBook(book)
+	bID, err := utils.AddBook(book, id)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	js, _ := json.Marshal(id)
+	js, _ := json.Marshal(bID)
 	w.Header().Set("Content-Type", http.DetectContentType(js))
 	w.Write(js)
 }
@@ -120,6 +125,36 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("user added"))
 }
 
+func AddToLibrary(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	if id == 0 {
+		http.Error(w, "not logged in", 401)
+	}
+	decoder := json.NewDecoder(r.Body)
+	var listAdd models.ReqBookListAdd
+	err := decoder.Decode(&listAdd)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if listAdd.List != "read" || listAdd.List != "to_read" || listAdd.List != "library" || listAdd.List != "liked" {
+		http.Error(w, "cant add to list", 300)
+		return
+
+	}
+	err = utils.AddToBookList(id, listAdd)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("success")))
+	w.Write([]byte("success"))
+}
+
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
@@ -127,6 +162,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&loginReader)
 	if err != nil {
 		fmt.Println(err.Error())
+		return
 	}
 	fmt.Println(loginReader)
 	fmt.Println(loginReader.Email)
@@ -187,6 +223,9 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		http.Error(w, "book not found", 404)
 		return
+	}
+	if book.Title == "" {
+
 	}
 	authors, ok := ctx.Value(utils.AuthorKey).([]models.Author)
 	webbook := book.ToResWebBook(authors)

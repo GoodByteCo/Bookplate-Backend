@@ -150,7 +150,13 @@ func CheckIfPresent(email string) (models.Reader, error) {
 //func AddAuthor(add models.Author) error{
 //}
 
-func AddBook(add models.ReqWebBook) (string, error) {
+func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
+	db := bdb.ConnectToBook()
+	db = db.Exec("UPDATE readers SET ? = array_append(?,'?') WHERE ID = ?", listAdd.List, listAdd.List, listAdd.BookID, reader_id)
+	return db.Error
+}
+
+func AddBook(add models.ReqWebBook, reader_id uint) (string, error) {
 	fmt.Println(add.Year)
 	db := bdb.Connect()
 	authors := add.Authors
@@ -168,7 +174,7 @@ func AddBook(add models.ReqWebBook) (string, error) {
 		Year:        year,
 		Description: add.Description,
 		CoverURL:    add.CoverUrl,
-		ReaderID:    0, //do thing where i get reader added
+		ReaderID:    uint(reader_id), //do thing where i get reader added
 		CreatedAt:   time.Time{},
 		UpdatedAt:   time.Time{},
 		DeletedAt:   nil,

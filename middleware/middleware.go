@@ -77,7 +77,9 @@ func LoginWare(next http.Handler) http.Handler {
 		}
 
 		fmt.Println(claims["reader_id"])
-		ctx := context.WithValue(r.Context(), utils.BookKey, claims["reader_id"])
+		tID := claims["reader_id"]
+		readerID := tID.(uint)
+		ctx := context.WithValue(r.Context(), utils.BookKey, readerID)
 		//get claims
 		// Token is authenticated, pass it through
 		next.ServeHTTP(w, r.WithContext(ctx))

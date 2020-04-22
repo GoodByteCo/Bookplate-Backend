@@ -37,6 +37,11 @@ type ReqWebBook struct {
 	CoverUrl    string   `json:"cover_url"`
 }
 
+type ReqBookListAdd struct {
+	List   string `json:"list"`
+	BookID string `json:"book_id"`
+}
+
 //Book info sent to site
 type ResWebBook struct {
 	Title       string            `json:"title"`
