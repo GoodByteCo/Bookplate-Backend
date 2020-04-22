@@ -267,7 +267,7 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 		Library: binarySearch(book_id, reader.Library),
 	}
 	var in models.Friends
-	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select friends from readers where ID = $1) vtable on readers.id = ANY (vtable.friends) WHERE readers.library @> ARRAY['$2']::VARCHAR[]", id, book_id).Scan(&in)
+	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select friends from readers where ID = $1) vtable on readers.id = ANY (vtable.friends) WHERE readers.library @> ARRAY[$2]::VARCHAR[]", id, book_id).Scan(&in)
 	fmt.Println(inList)
 	fmt.Println(in)
 

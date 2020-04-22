@@ -58,9 +58,9 @@ type ReqInList struct {
 }
 
 type Friend struct {
-	ID           uint   `json:"id"`
-	Name         string `json:"name"`
-	ProfileColor string `json:"profile_color"`
+	ID            uint   `json:"id"`
+	Name          string `json:"name"`
+	ProfileColour string `json:"profile_color"`
 }
 
 type Friends []Friend
