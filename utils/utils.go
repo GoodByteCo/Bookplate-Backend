@@ -152,7 +152,7 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
-	setUpdate := fmt.Sprintf("%s || '%s'", listAdd.List, listAdd.BookID)
+	setUpdate := fmt.Sprintf("array_append(%s, '%s')", listAdd.List, listAdd.BookID)
 	fmt.Println(setUpdate)
 	sql, test, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
 	fmt.Println(test)
