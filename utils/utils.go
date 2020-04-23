@@ -307,14 +307,14 @@ func GetProfile(id uint) models.ReqProfile {
 	db.Where(models.Reader{ID: id}).Find(&reader)
 	db.Where(models.Book{BookID: reader.FavouriteBook}).Find(&favBook)
 	var booklist []models.BookForProfile
-	for i, r := range reader.Liked {
-		if i >= 5 {
+	for i := range reverse(reader.Liked) {
+		if i.int >= 5 {
 			break
 		}
 		var book models.Book
-		db.Where(models.Book{BookID: r}).Find(&book)
+		db.Where(models.Book{BookID: i.string}).Find(&book)
 		forProfile := models.BookForProfile{
-			BookID:   r,
+			BookID:   i.string,
 			Title:    book.Title,
 			CoverURL: book.CoverURL,
 		}
@@ -353,4 +353,25 @@ func binarySearch(searchWord string, list []string) bool {
 	}
 
 	return true
+}
+
+func reverse(lst []string) chan struct {
+	int
+	string
+} {
+	ret := make(chan struct {
+		int
+		string
+	})
+	go func() {
+		for i, _ := range lst {
+			ret <- struct {
+				int
+				string
+			}{i, lst[len(lst)-1-i]}
+
+		}
+		close(ret)
+	}()
+	return ret
 }
