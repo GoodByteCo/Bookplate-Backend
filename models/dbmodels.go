@@ -278,11 +278,11 @@ func Start(db *gorm.DB) error {
 		{
 			ID: "Add array indexs",
 			Migrate: func(tx *gorm.DB) error {
-				tx = tx.Exec("CREATE INDEX friends_idx ON readers USING GIST (friends)")
-				tx = tx.Exec("CREATE INDEX read_idx ON readers USING GIST (read)")
-				tx = tx.Exec("CREATE INDEX to_read_idx ON readers USING GIST (to_read)")
-				tx = tx.Exec("CREATE INDEX liked_idx ON readers USING GIST (liked)")
-				return tx.Exec("CREATE INDEX library_idx ON readers USING GIST (library)").Error
+				tx = tx.Exec("CREATE INDEX friends_idx ON readers USING GIN (friends)")
+				tx = tx.Exec("CREATE INDEX read_idx ON readers USING GIN (read)")
+				tx = tx.Exec("CREATE INDEX to_read_idx ON readers USING GIN (to_read)")
+				tx = tx.Exec("CREATE INDEX liked_idx ON readers USING GIN (liked)")
+				return tx.Exec("CREATE INDEX library_idx ON readers USING GIN (library)").Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				tx = tx.Exec("DROP INDEX friends_idx")
