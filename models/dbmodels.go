@@ -237,7 +237,7 @@ func Start(db *gorm.DB) error {
 					Authors     []Author   `gorm:"many2many:book_authors;"`
 					BooknameCol string     `type:"tsvector"`
 				}
-				tx = tx.Exec("ALTER TABLE books ADD COLUMN bookname_col tsvector GENERATED ALWAYS AS (to_tsvector('simple', coalesce(title, ''))) STORED;")
+				tx = tx.Exec("ALTER TABLE books ADD COLUMN bookname_col tsvector GENERATED ALWAYS AS (to_tsvector('english', coalesce(title, ''))) STORED;")
 				tx = tx.Model(&Book{}).AddIndex("idx_bookname", "bookname_col ")
 				return tx.Error
 			},
