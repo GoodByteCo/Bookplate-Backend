@@ -248,7 +248,7 @@ func Start(db *gorm.DB) error {
 			},
 		},
 		{
-			ID: "Add Read",
+			ID: "Add Favourite Book",
 			Migrate: func(tx *gorm.DB) error {
 				type Reader struct {
 					ID            uint       `gorm:"primary_key" json:"-"`
