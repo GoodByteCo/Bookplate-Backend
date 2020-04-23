@@ -154,6 +154,7 @@ func CheckIfPresent(email string) (models.Reader, error) {
 
 func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
+	defer db.Close()
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	setUpdate := fmt.Sprintf("array_append(%s, '%s')", listAdd.List, listAdd.BookID)
@@ -173,6 +174,7 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 
 func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
+	defer db.Close()
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	setUpdate := fmt.Sprintf("array_remove(%s, '%s')", listAdd.List, listAdd.BookID)
@@ -193,6 +195,7 @@ func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 func AddBook(add models.ReqWebBook, reader_id uint) (string, error) {
 	fmt.Println(add.Year)
 	db := bdb.Connect()
+	defer db.Close()
 	authors := add.Authors
 	for i, a := range authors {
 		if a.AuthorId == "" {
@@ -234,6 +237,7 @@ func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	}
 	pronouns := postgres.Jsonb{RawMessage: psPronouns}
 	db := bdb.ConnectToReader()
+	defer db.Close()
 	reader := models.Reader{
 		Name:          add.Name,
 		Pronouns:      pronouns,
@@ -255,6 +259,7 @@ func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 
 func GetReaderFromDB(emailHash int64) (models.Reader, bool) {
 	db := bdb.ConnectToReader()
+	defer db.Close()
 	emptyReader := models.Reader{}
 	found := db.Where(models.Reader{EmailHash: emailHash}).Find(&emptyReader).RecordNotFound()
 	defer db.Close()
@@ -275,6 +280,7 @@ func String(length int) string {
 
 func GetReaderBook(id uint, book_id string) models.ReqInList {
 	db := bdb.Connect()
+	defer db.Close()
 	var reader models.Reader
 	db.Where(&models.Reader{ID: id}).First(&reader)
 	sort.Strings(reader.Library)
@@ -304,6 +310,7 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 
 func GetProfile(reader models.Reader) models.ReqProfile {
 	db := bdb.Connect()
+	defer db.Close()
 	var favBook models.Book
 	db.Where(models.Book{BookID: reader.FavouriteBook}).Find(&favBook)
 	var booklist []models.BookForProfile
@@ -338,6 +345,7 @@ func GetProfile(reader models.Reader) models.ReqProfile {
 
 func GetLiked(reader models.Reader) models.ReqProfileList {
 	db := bdb.Connect()
+	defer db.Close()
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.Liked) {
 		var book models.Book
@@ -359,6 +367,7 @@ func GetLiked(reader models.Reader) models.ReqProfileList {
 
 func GetRead(reader models.Reader) models.ReqProfileList {
 	db := bdb.Connect()
+	defer db.Close()
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.Read) {
 		var book models.Book
@@ -380,6 +389,7 @@ func GetRead(reader models.Reader) models.ReqProfileList {
 
 func GetToRead(reader models.Reader) models.ReqProfileList {
 	db := bdb.Connect()
+	defer db.Close()
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.ToRead) {
 		var book models.Book
@@ -401,6 +411,7 @@ func GetToRead(reader models.Reader) models.ReqProfileList {
 
 func GetLibrary(reader models.Reader) models.ReqProfileList {
 	db := bdb.Connect()
+	defer db.Close()
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.Library) {
 		var book models.Book
@@ -422,6 +433,7 @@ func GetLibrary(reader models.Reader) models.ReqProfileList {
 
 func MutualFriends(id uint) {
 	db := bdb.Connect()
+	defer db.Close()
 	db.Exec("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on readers.id = ANY (vtable.friends) WHERE vtable.id = ANY (readers.friends)", id)
 }
 

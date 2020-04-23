@@ -22,6 +22,7 @@ func BookCtx(next http.Handler) http.Handler {
 		book := models.Book{}
 		var authors []models.Author
 		db := db2.Connect()
+		defer db.Close()
 		db.Where(models.Book{BookID: bookId}).First(&book)
 		db.Model(&book).Related(&authors, "Authors")
 		ctx := context.WithValue(r.Context(), utils.BookKey, book)
@@ -36,6 +37,7 @@ func AuthorCtx(next http.Handler) http.Handler {
 		author := models.Author{}
 		var books []models.Book
 		db := db2.Connect()
+		defer db.Close()
 		db.Where(models.Author{AuthorId: authorId}).First(&author)
 		db.Model(&author).Related(&books, "Books")
 		ctx := context.WithValue(r.Context(), utils.AuthorKey, author)
@@ -50,6 +52,7 @@ func ReaderWare(next http.Handler) http.Handler {
 		intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
 		var reader models.Reader
 		db := db2.Connect()
+		defer db.Close()
 		notFound := db.Where(models.Reader{ID: uint(intReaderID)}).Find(&reader).RecordNotFound()
 		if notFound {
 			http.Error(w, "user not found", 404)

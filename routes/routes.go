@@ -310,6 +310,7 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	var records []models.Book
 	var webBooks []models.AllWebBook
 	db := bdb.ConnectToBook()
+	defer db.Close()
 	if err := db.Find(&records).Error; err != nil {
 		fmt.Println(err)
 	}
