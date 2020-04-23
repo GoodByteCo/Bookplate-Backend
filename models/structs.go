@@ -130,7 +130,7 @@ type BookForProfile struct {
 
 type FavouriteBook struct {
 	BookID string `json:"book_id"`
-	Title  string `json:"book_id"`
+	Title  string `json:"title"`
 }
 
 func (a *ResBooksForAuthor) Sort() {
