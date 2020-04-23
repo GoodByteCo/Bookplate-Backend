@@ -175,7 +175,7 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 			id int
 		}
 		var tempid temp
-		db.Exec("SELECT id from readers WHERE read @> ARRAY[]::VARCHAR[] AND ID = ", listAdd.BookID, reader_id).Scan(&tempid)
+		db.Exec("SELECT id from readers WHERE read @> ARRAY[$1]::VARCHAR[] AND ID = $2", listAdd.BookID, reader_id).Scan(&tempid)
 		if tempid.id == 0 {
 			AddToBookList(reader_id, models.ReqBookListAdd{List: "read", BookID: listAdd.BookID})
 		}
