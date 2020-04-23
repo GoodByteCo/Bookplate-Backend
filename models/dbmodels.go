@@ -275,6 +275,23 @@ func Start(db *gorm.DB) error {
 				return tx.Model(&Reader{}).DropColumn("favourite_book").Error
 			},
 		},
+		{
+			ID: "Add array indexs",
+			Migrate: func(tx *gorm.DB) error {
+				tx = tx.Exec("CREATE INDEX friends_idx ON readers USING GIST (friends)")
+				tx = tx.Exec("CREATE INDEX read_idx ON readers USING GIST (read)")
+				tx = tx.Exec("CREATE INDEX to_read_idx ON readers USING GIST (to_read)")
+				tx = tx.Exec("CREATE INDEX liked_idx ON readers USING GIST (liked)")
+				return tx.Exec("CREATE INDEX library_idx ON readers USING GIST (library)").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				tx = tx.Exec("DROP INDEX friends_idx")
+				tx = tx.Exec("DROP INDEX read_idx")
+				tx = tx.Exec("DROP INDEX to_read_idx")
+				tx = tx.Exec("DROP INDEX liked_idx")
+				return tx.Exec("DROP INDEX library_idx").Error
+			},
+		},
 	})
 	return m.Migrate()
 }
