@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
@@ -39,6 +40,22 @@ func AuthorCtx(next http.Handler) http.Handler {
 		db.Model(&author).Related(&books, "Books")
 		ctx := context.WithValue(r.Context(), utils.AuthorKey, author)
 		ctx = context.WithValue(ctx, utils.BookKey, books)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func ReaderWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		readerID := chi.URLParam(r, "readerID")
+		intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+		var reader models.Reader
+		db := db2.Connect()
+		notFound := db.Where(models.Reader{ID: uint(intReaderID)}).Find(&reader).RecordNotFound()
+		if notFound {
+			http.Error(w, "user not found", 404)
+			return
+		}
+		ctx := context.WithValue(r.Context(), utils.ReaderUserKey, reader)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -120,7 +120,14 @@ type ReqProfile struct {
 	Name          string           `json:"name"`
 	ProfileColour string           `json:"profile_color"`
 	FavouriteBook FavouriteBook    `json:"favourite_book"`
+	Pronoun       string           `json:"pronoun"`
 	LikedBooks    []BookForProfile `json:"liked_books"`
+}
+
+type ReqProfileList struct {
+	Name          string           `json:"name"`
+	ProfileColour string           `json:"profile_color"`
+	BookList      []BookForProfile `json:"book_list"`
 }
 
 type BookForProfile struct {

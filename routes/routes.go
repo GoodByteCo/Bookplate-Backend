@@ -327,19 +327,91 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	w.Header().Set("Content-Type", "application/json")
-	readerID := chi.URLParam(r, "readerID")
-	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
-	profile, err := utils.GetProfile(uint(intReaderID))
-	if err != nil {
-		http.Error(w, err.Error(), 404)
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		//errpr
 		return
 	}
+	profile := utils.GetProfile(reader)
 	js, err := json.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
 	w.Write(js)
 }
+
+func GetLiked(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		//errpr
+		return
+	}
+	profile := utils.GetLiked(reader)
+	js, err := json.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+
+}
+
+func GetRead(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		//errpr
+		return
+	}
+	profile := utils.GetRead(reader)
+	js, err := json.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+
+}
+
+func GetToRead(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		//errpr
+		return
+	}
+	profile := utils.GetToRead(reader)
+	js, err := json.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+
+}
+
+func GetLibrary(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		//errpr
+		return
+	}
+	profile := utils.GetLibrary(reader)
+	js, err := json.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+}
+
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{
 		AccountID:      os.Getenv("B2_ACCOUNT_ID"),

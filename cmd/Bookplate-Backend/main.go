@@ -62,7 +62,14 @@ func main() {
 		})
 
 		r.Route("/profile", func(r chi.Router) {
-			r.Get("/{readerID}", routes.GetProfile)
+			r.Route("/{readerID}", func(r chi.Router) {
+				r.Use(middleware.ReaderWare)
+				r.Get("/", routes.GetProfile)
+				r.Get("/liked", routes.GetLiked)
+				r.Get("/library", routes.GetLibrary)
+				r.Get("/read", routes.GetRead)
+				r.Get("/to-read", routes.GetToRead)
+			})
 		})
 
 		r.Route("/author", func(r chi.Router) {

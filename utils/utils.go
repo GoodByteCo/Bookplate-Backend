@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"image/jpeg"
 	png2 "image/png"
@@ -36,9 +36,10 @@ import (
 type key string
 
 const (
-	ReaderKey key = "reader_id"
-	AuthorKey key = "author"
-	BookKey   key = "book"
+	ReaderKey     key = "reader_id"
+	AuthorKey     key = "author"
+	BookKey       key = "book"
+	ReaderUserKey key = "reader"
 )
 
 var TokenAuth *jwtauth.JWTAuth
@@ -301,14 +302,9 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 	return finalList
 }
 
-func GetProfile(id uint) (models.ReqProfile, error) {
+func GetProfile(reader models.Reader) models.ReqProfile {
 	db := bdb.Connect()
-	var reader models.Reader
 	var favBook models.Book
-	notFound := db.Where(models.Reader{ID: id}).Find(&reader).RecordNotFound()
-	if notFound {
-		return models.ReqProfile{}, errors.New("User not found")
-	}
 	db.Where(models.Book{BookID: reader.FavouriteBook}).Find(&favBook)
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.Liked) {
@@ -328,13 +324,105 @@ func GetProfile(id uint) (models.ReqProfile, error) {
 		BookID: favBook.BookID,
 		Title:  favBook.Title,
 	}
+	var pronoun models.Pronoun
+	jsonPro := []byte(reader.Pronouns.RawMessage)
+	json.Unmarshal(jsonPro, &pronoun)
 	return models.ReqProfile{
 		Name:          reader.Name,
 		ProfileColour: reader.ProfileColour,
+		Pronoun:       pronoun.Possessive,
 		FavouriteBook: favBookModel,
 		LikedBooks:    booklist,
-	}, nil
+	}
+}
 
+func GetLiked(reader models.Reader) models.ReqProfileList {
+	db := bdb.Connect()
+	var booklist []models.BookForProfile
+	for i := range reverse(reader.Liked) {
+		var book models.Book
+		db.Where(models.Book{BookID: i.string}).Find(&book)
+		forProfile := models.BookForProfile{
+			BookID:   i.string,
+			Title:    book.Title,
+			CoverURL: book.CoverURL,
+		}
+		booklist = append(booklist, forProfile)
+	}
+	return models.ReqProfileList{
+		Name:          reader.Name,
+		ProfileColour: reader.ProfileColour,
+		BookList:      booklist,
+	}
+
+}
+
+func GetRead(reader models.Reader) models.ReqProfileList {
+	db := bdb.Connect()
+	var booklist []models.BookForProfile
+	for i := range reverse(reader.Read) {
+		var book models.Book
+		db.Where(models.Book{BookID: i.string}).Find(&book)
+		forProfile := models.BookForProfile{
+			BookID:   i.string,
+			Title:    book.Title,
+			CoverURL: book.CoverURL,
+		}
+		booklist = append(booklist, forProfile)
+	}
+	return models.ReqProfileList{
+		Name:          reader.Name,
+		ProfileColour: reader.ProfileColour,
+		BookList:      booklist,
+	}
+
+}
+
+func GetToRead(reader models.Reader) models.ReqProfileList {
+	db := bdb.Connect()
+	var booklist []models.BookForProfile
+	for i := range reverse(reader.ToRead) {
+		var book models.Book
+		db.Where(models.Book{BookID: i.string}).Find(&book)
+		forProfile := models.BookForProfile{
+			BookID:   i.string,
+			Title:    book.Title,
+			CoverURL: book.CoverURL,
+		}
+		booklist = append(booklist, forProfile)
+	}
+	return models.ReqProfileList{
+		Name:          reader.Name,
+		ProfileColour: reader.ProfileColour,
+		BookList:      booklist,
+	}
+
+}
+
+func GetLibrary(reader models.Reader) models.ReqProfileList {
+	db := bdb.Connect()
+	var booklist []models.BookForProfile
+	for i := range reverse(reader.Library) {
+		var book models.Book
+		db.Where(models.Book{BookID: i.string}).Find(&book)
+		forProfile := models.BookForProfile{
+			BookID:   i.string,
+			Title:    book.Title,
+			CoverURL: book.CoverURL,
+		}
+		booklist = append(booklist, forProfile)
+	}
+	return models.ReqProfileList{
+		Name:          reader.Name,
+		ProfileColour: reader.ProfileColour,
+		BookList:      booklist,
+	}
+
+}
+
+func MutualFriends(id uint) {
+	db := bdb.Connect()
+	db.Exec("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on readers.id = ANY (vtable.friends) WHERE vtable.id = ANY (readers.friends)", id)
 }
 
 func binarySearch(searchWord string, list []string) bool {
