@@ -116,6 +116,23 @@ type AllWebBook struct {
 	BookColor string `json:"book_color"`
 }
 
+type ReqProfile struct {
+	Name          string           `json:"name"`
+	ProfileColour string           `json:"profile_color"`
+	FavouriteBook FavouriteBook    `json:"favourite_book"`
+	LikedBooks    []BookForProfile `json:"liked_books"`
+}
+
+type BookForProfile struct {
+	BookID   string `json:"book_id"`
+	CoverURL string `json:"cover_url"`
+}
+
+type FavouriteBook struct {
+	BookID string `json:"book_id"`
+	Title  string `json:"book_id"`
+}
+
 func (a *ResBooksForAuthor) Sort() {
 	sort.SliceStable(a, func(i, j int) bool { return (*a)[i].Year < (*a)[j].Year })
 }

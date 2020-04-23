@@ -300,6 +300,38 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 	return finalList
 }
 
+func GetProfile(id uint) models.ReqProfile {
+	db := bdb.Connect()
+	var reader models.Reader
+	var favBook models.Book
+	db.Where(models.Reader{ID: id}).Find(&reader)
+	db.Where(models.Book{BookID: reader.FavouriteBook}).Find(&favBook)
+	var booklist []models.BookForProfile
+	for i, r := range reader.Liked {
+		if i >= 5 {
+			break
+		}
+		var book models.Book
+		db.Where(models.Book{BookID: r}).Find(&book)
+		forProfile := models.BookForProfile{
+			BookID:   r,
+			CoverURL: book.CoverURL,
+		}
+		booklist = append(booklist, forProfile)
+	}
+	favBookModel := models.FavouriteBook{
+		BookID: favBook.BookID,
+		Title:  favBook.Title,
+	}
+	return models.ReqProfile{
+		Name:          reader.Name,
+		ProfileColour: reader.ProfileColour,
+		FavouriteBook: favBookModel,
+		LikedBooks:    booklist,
+	}
+
+}
+
 func binarySearch(searchWord string, list []string) bool {
 
 	low := 0

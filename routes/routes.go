@@ -323,6 +323,19 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(js)
 }
+
+func GetProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	readerID := chi.URLParam(r, "readerID")
+	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+	profile := utils.GetProfile(uint(intReaderID))
+	js, err := json.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+}
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{
 		AccountID:      os.Getenv("B2_ACCOUNT_ID"),
