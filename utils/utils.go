@@ -315,6 +315,7 @@ func GetProfile(id uint) models.ReqProfile {
 		db.Where(models.Book{BookID: r}).Find(&book)
 		forProfile := models.BookForProfile{
 			BookID:   r,
+			Title:    book.Title,
 			CoverURL: book.CoverURL,
 		}
 		booklist = append(booklist, forProfile)

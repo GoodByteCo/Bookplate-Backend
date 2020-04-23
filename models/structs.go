@@ -125,6 +125,7 @@ type ReqProfile struct {
 
 type BookForProfile struct {
 	BookID   string `json:"book_id"`
+	Title    string `json:"title"`
 	CoverURL string `json:"cover_url"`
 }
 
