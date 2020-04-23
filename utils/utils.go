@@ -176,10 +176,10 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 		}
 		var tempid temp
 		db.Exec("SELECT id from readers WHERE read @> ARRAY[$1]::VARCHAR[] AND ID = $2", listAdd.BookID, reader_id).Scan(&tempid)
+		fmt.Println(tempid)
 		if tempid.id == 0 {
 			AddToBookList(reader_id, models.ReqBookListAdd{List: "read", BookID: listAdd.BookID})
 		}
-		DeleteFromBookList(reader_id, models.ReqBookListAdd{List: "to_read", BookID: listAdd.BookID})
 	} else if listAdd.List == "read" {
 		DeleteFromBookList(reader_id, models.ReqBookListAdd{List: "to_read", BookID: listAdd.BookID})
 	}
