@@ -171,8 +171,6 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db = db.Exec(sql, reader_id)
 	if listAdd.List == "like" {
 		// checks is read if not add to read
-		notLiked := db.Exec("SELECT id from readers WHERE read @> ARRAY[$1]::VARCHAR[] AND ID = $2", listAdd.BookID, reader_id).RecordNotFound()
-		if notLiked {
 		var id int
 		db.Exec("SELECT id from readers WHERE read @> ARRAY[$1]::VARCHAR[] AND ID = $2", listAdd.BookID, reader_id).Scan(&id)
 		if id == 0 {
