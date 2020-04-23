@@ -169,6 +169,16 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	sql = strings.Replace(sql, "$1", setUpdate, 1)
 	sql = strings.Replace(sql, "$2", "$1", 1)
 	db = db.Exec(sql, reader_id)
+	if listAdd.List == "like" {
+		// checks is read if not add to read
+		notLiked := db.Exec("SELECT id from readers WHERE read @> ARRAY[$1]::VARCHAR[] AND ID = $2", listAdd.BookID, reader_id).RecordNotFound()
+		if notLiked {
+			AddToBookList(reader_id, models.ReqBookListAdd{List: "read", BookID: listAdd.BookID})
+		}
+		DeleteFromBookList(reader_id, models.ReqBookListAdd{List: "to_read", BookID: listAdd.BookID})
+	} else if listAdd.List == "read" {
+		DeleteFromBookList(reader_id, models.ReqBookListAdd{List: "to_read", BookID: listAdd.BookID})
+	}
 	return db.Error
 }
 
