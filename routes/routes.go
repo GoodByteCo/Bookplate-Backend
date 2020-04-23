@@ -329,7 +329,11 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	readerID := chi.URLParam(r, "readerID")
 	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
-	profile := utils.GetProfile(uint(intReaderID))
+	profile, err := utils.GetProfile(uint(intReaderID))
+	if err != nil {
+		http.Error(w, err.Error(), 404)
+		return
+	}
 	js, err := json.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)

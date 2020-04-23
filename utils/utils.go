@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"image/jpeg"
 	png2 "image/png"
@@ -300,11 +301,14 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 	return finalList
 }
 
-func GetProfile(id uint) models.ReqProfile {
+func GetProfile(id uint) (models.ReqProfile, error) {
 	db := bdb.Connect()
 	var reader models.Reader
 	var favBook models.Book
-	db.Where(models.Reader{ID: id}).Find(&reader)
+	notFound := db.Where(models.Reader{ID: id}).Find(&reader).RecordNotFound()
+	if notFound {
+		return models.ReqProfile{}, errors.New("User not found")
+	}
 	db.Where(models.Book{BookID: reader.FavouriteBook}).Find(&favBook)
 	var booklist []models.BookForProfile
 	for i := range reverse(reader.Liked) {
@@ -329,7 +333,7 @@ func GetProfile(id uint) models.ReqProfile {
 		ProfileColour: reader.ProfileColour,
 		FavouriteBook: favBookModel,
 		LikedBooks:    booklist,
-	}
+	}, nil
 
 }
 
@@ -364,7 +368,7 @@ func reverse(lst []string) chan struct {
 		string
 	})
 	go func() {
-		for i, _ := range lst {
+		for i := range lst {
 			ret <- struct {
 				int
 				string
