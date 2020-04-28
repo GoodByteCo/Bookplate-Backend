@@ -51,7 +51,8 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 	var sql string
 	switch a {
 	case add:
-		set := fmt.Sprintf("array_append('%s', '%s')", changing, toChange)
+		set := fmt.Sprintf("array_append(%s, '%s')", changing, toChange)
+		fmt.Println(set)
 		sql, _, err := psql.Update("readers").Set(changing, set).Where("ID = ?", reader).ToSql()
 		if err != nil {
 			fmt.Println(err.Error())
@@ -61,12 +62,13 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 		sql = strings.Replace(sql, "$2", "$1", 1)
 	case remove:
 		set := fmt.Sprintf("array_remove(%s, '%s')", changing, toChange)
-		sql, test, err := psql.Update("readers").Set(changing, set).Where("ID = ?", reader).ToSql()
-		fmt.Println(test)
+		fmt.Println(set)
+		sql, _, err := psql.Update("readers").Set(changing, set).Where("ID = ?", reader).ToSql()
 		if err != nil {
 			fmt.Println(err.Error())
 			return "", err
 		}
+		fmt.Println(sql)
 		sql = strings.Replace(sql, "$1", set, 1)
 		sql = strings.Replace(sql, "$2", "$1", 1)
 	}
@@ -193,10 +195,17 @@ func CheckIfPresent(email string) (models.Reader, error) {
 func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
 	defer db.Close()
-	sql, err := genArrayModifySQL(add, listAdd.List, listAdd.BookID, reader_id)
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+
+	setUpdate := fmt.Sprintf("array_append(%s, '%s')", listAdd.List, listAdd.BookID)
+	fmt.Println(setUpdate)
+	sql, _, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
+	sql = strings.Replace(sql, "$1", setUpdate, 1)
+	sql = strings.Replace(sql, "$2", "$1", 1)
 	fmt.Println(sql)
 	db = db.Exec(sql, reader_id)
 	if listAdd.List == "liked" {
