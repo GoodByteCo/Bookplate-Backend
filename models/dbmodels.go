@@ -323,7 +323,7 @@ func Start(db *gorm.DB) error {
 				tx = tx.AutoMigrate(&Reader{})
 				tx = tx.Exec("CREATE INDEX friends_pending_idx ON readers USING GIN (friends_pending)")
 				tx = tx.Exec("CREATE INDEX friends_request_idx ON readers USING GIN (friends_request)")
-				tx = tx.Exec("CREATE INDEX reader_blocked_idx ON readers USING GIN (reader_blocked_read)")
+				tx = tx.Exec("CREATE INDEX reader_blocked_idx ON readers USING GIN (reader_blocked)")
 				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {
