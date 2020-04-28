@@ -49,7 +49,6 @@ func (a arrayMod) String() string {
 
 func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint) (string, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	readerID := strconv.FormatUint(uint64(reader), 10)
 	switch a {
 	case add:
 		set := fmt.Sprintf("array_append(%s, '%s')", changing, toChange)
@@ -60,7 +59,7 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 			return "", err
 		}
 		sql = strings.Replace(sql, "$1", set, 1)
-		sql = strings.Replace(sql, "$2", readerID, 1)
+		sql = strings.Replace(sql, "$2", "$1", 1)
 		return sql, nil
 	case remove:
 		set := fmt.Sprintf("array_remove(%s, '%s')", changing, toChange)
@@ -72,7 +71,7 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 		}
 		fmt.Println(sql)
 		sql = strings.Replace(sql, "$1", set, 1)
-		sql = strings.Replace(sql, "$2", readerID, 1)
+		sql = strings.Replace(sql, "$2", "$1", 1)
 		return sql, nil
 	}
 	return "", errors.New("error")
@@ -236,7 +235,7 @@ func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 		return err
 	}
 	fmt.Println(sql)
-	db = db.Exec(sql)
+	db = db.Exec(sql, reader_id)
 	return db.Error
 }
 
@@ -518,10 +517,10 @@ func AddFriend(friendID uint, readerID uint) error {
 
 		db := bdb.Connect()
 		defer db.Close()
-		db = db.Exec(sqlR)
-		db = db.Exec(sqlF)
-		db = db.Exec(sqlRemPend)
-		db = db.Exec(sqlRemReq)
+		db = db.Exec(sqlR, readerID)
+		db = db.Exec(sqlF, friendID)
+		db = db.Exec(sqlRemPend, friendID)
+		db = db.Exec(sqlRemReq, readerID)
 		return db.Error
 	} else { // if requesting
 		sqlPending, err := genArrayModifySQL(add, "friends_pending", friend, readerID)
