@@ -106,3 +106,19 @@ func LoginWare(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func AuthWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		id, ok := ctx.Value(utils.ReaderKey).(uint)
+		if !ok {
+			http.Error(w, "not logged in", 401)
+			return
+		}
+		if id == 0 {
+			http.Error(w, "not logged in", 401)
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

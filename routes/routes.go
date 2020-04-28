@@ -204,7 +204,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		//no user redirect to create account
 	}
 	if utils.ConfirmPassword(reader.PasswordHash, loginReader.Password) {
-		expiry := time.Now().Add(time.Hour * 12)
+		expiry := time.Now().Add(time.Hour * 200)
 		mc := jwt.MapClaims{"reader_id": reader.ID, "iss": utils.Issuer}
 		jwtauth.SetIssuedNow(mc)
 		jwtauth.SetExpiry(mc, expiry)
@@ -255,7 +255,8 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if book.Title == "" {
-
+		http.Error(w, "book not found", 404)
+		return
 	}
 	authors, ok := ctx.Value(utils.AuthorKey).([]models.Author)
 	webbook := book.ToResWebBook(authors)
@@ -271,10 +272,12 @@ func GetReaderBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
 	if !ok {
+		http.Error(w, "not logged in", 401)
 		return
 	}
 	if id == 0 {
 		http.Error(w, "not logged in", 401)
+		return
 	}
 	list := utils.GetReaderBook(id, bookID)
 	js, err := json.Marshal(list)
