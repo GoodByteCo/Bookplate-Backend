@@ -48,6 +48,7 @@ func (a arrayMod) String() string {
 
 func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint) (string, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	readerID := strconv.FormatUint(uint64(reader), 10)
 	var sql string
 	switch a {
 	case add:
@@ -59,7 +60,7 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 			return "", err
 		}
 		sql = strings.Replace(sql, "$1", set, 1)
-		sql = strings.Replace(sql, "$2", "$1", 1)
+		sql = strings.Replace(sql, "$2", readerID, 1)
 	case remove:
 		set := fmt.Sprintf("array_remove(%s, '%s')", changing, toChange)
 		fmt.Println(set)
@@ -70,7 +71,7 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 		}
 		fmt.Println(sql)
 		sql = strings.Replace(sql, "$1", set, 1)
-		sql = strings.Replace(sql, "$2", "$1", 1)
+		sql = strings.Replace(sql, "$2", readerID, 1)
 	}
 	return sql, nil
 }
