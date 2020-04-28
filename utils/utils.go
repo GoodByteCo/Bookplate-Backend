@@ -234,7 +234,7 @@ func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 		return err
 	}
 	fmt.Println(sql)
-	db = db.Exec(sql, reader_id)
+	db = db.Exec(sql)
 	return db.Error
 }
 
@@ -516,10 +516,10 @@ func AddFriend(friendID uint, readerID uint) error {
 
 		db := bdb.Connect()
 		defer db.Close()
-		db = db.Exec(sqlR, readerID)
-		db = db.Exec(sqlF, friendID)
-		db = db.Exec(sqlRemPend, friendID)
-		db = db.Exec(sqlRemReq, readerID)
+		db = db.Exec(sqlR)
+		db = db.Exec(sqlF)
+		db = db.Exec(sqlRemPend)
+		db = db.Exec(sqlRemReq)
 		return db.Error
 	} else { // if requesting
 		sqlPending, err := genArrayModifySQL(add, "friends_pending", friend, readerID)
@@ -534,8 +534,8 @@ func AddFriend(friendID uint, readerID uint) error {
 		}
 		db := bdb.Connect()
 		defer db.Close()
-		db = db.Exec(sqlPending, readerID)
-		db = db.Exec(sqlRequest, friendID)
+		db = db.Exec(sqlPending)
+		db = db.Exec(sqlRequest)
 		return db.Error
 	}
 }
