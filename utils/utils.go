@@ -493,14 +493,16 @@ func AddFriend(friendID uint, readerID uint) error {
 	reader := strconv.FormatUint(uint64(readerID), 10)
 	// if responsed to request
 	type temp struct {
-		id uint
+		ID uint
 	}
 	var tempid temp
 	db := bdb.Connect()
+	fmt.Println(friendID)
+	fmt.Println(readerID)
 	db.Raw("SELECT id from readers WHERE friends_request @> ARRAY[$1]::INT[] AND ID = $2", friendID, readerID).Scan(&tempid)
 	db.Close()
 	fmt.Println(tempid)
-	if tempid.id != 0 {
+	if tempid.ID != 0 {
 		//add to friends for both
 		sqlR, err := genArrayModifySQL(add, "friends", friend, readerID)
 		if err != nil {
@@ -536,8 +538,8 @@ func AddFriend(friendID uint, readerID uint) error {
 
 		db := bdb.Connect()
 		defer db.Close()
-		db = db.Exec(sqlPending)
-		db = db.Exec(sqlRequest)
+		db = db.Exec(sqlPending, readerID)
+		db = db.Exec(sqlRequest, friendID)
 		return db.Error
 	}
 }
