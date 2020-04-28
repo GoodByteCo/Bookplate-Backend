@@ -239,7 +239,8 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
 		Value:    "",
-		MaxAge:   -1,
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Domain:   "bookplate.co",
