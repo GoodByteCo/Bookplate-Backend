@@ -241,8 +241,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		MaxAge:   -1,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Domain:   "bookplate.co",
 	})
-
 	w.Write([]byte("Logged Out"))
 }
 
