@@ -47,9 +47,7 @@ func main() {
 	r.Use(middleware.LoginWare)
 	r.Route("/", func(r chi.Router) {
 		r.Get("/books", routes.GetAllBooks)
-		r.Get("/logout", routes.Logout)
-		//r.Get("/auth", auth.Auth)
-		//r.Get("/auth/callback", auth.AuthCallback)
+		r.Post("/logout", routes.Logout)
 		r.Get("/ping", routes.Ping)
 		r.Group(func(r chi.Router) {
 			r.Use(chimiddleware.AllowContentType("application/json"))
@@ -70,6 +68,13 @@ func main() {
 				r.Get("/read", routes.GetRead)
 				r.Get("/to-read", routes.GetToRead)
 			})
+		})
+
+		r.Route("/friend", func(r chi.Router) {
+			r.Use(middleware.AuthWare)
+			r.Post("/add/{readerID}", routes.AddFriend)
+			// r.Post("/remove/{readerID}")
+			// r.Post("/blocked/{readerID}")
 		})
 
 		r.Route("/author", func(r chi.Router) {

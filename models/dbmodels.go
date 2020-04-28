@@ -56,23 +56,26 @@ func (b *Book) SetStringId() {
 
 //Reader type for database
 type Reader struct {
-	ID            uint       `gorm:"primary_key" json:"-"`
-	CreatedAt     time.Time  `json:"-"`
-	UpdatedAt     time.Time  `json:"-"`
-	DeletedAt     *time.Time `sql:"index" json:"-"`
-	Name          string
-	Pronouns      postgres.Jsonb
-	ProfileColour string
-	Library       pq.StringArray `gorm:"type:varchar(64)[]"`
-	ToRead        pq.StringArray `gorm:"type:varchar(64)[]"`
-	Liked         pq.StringArray `gorm:"type:varchar(64)[]"`
-	Read          pq.StringArray `gorm:"type:varchar(64)[]"`
-	Friends       pq.Int64Array  `gorm:"type:integer[]"`
-	PasswordHash  string
-	EmailHash     int64
-	Plural        bool
-	FavouriteBook string
-	Books         []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
+	ID             uint       `gorm:"primary_key" json:"-"`
+	CreatedAt      time.Time  `json:"-"`
+	UpdatedAt      time.Time  `json:"-"`
+	DeletedAt      *time.Time `sql:"index" json:"-"`
+	Name           string
+	Pronouns       postgres.Jsonb
+	ProfileColour  string
+	Library        pq.StringArray `gorm:"type:varchar(64)[]"`
+	ToRead         pq.StringArray `gorm:"type:varchar(64)[]"`
+	Liked          pq.StringArray `gorm:"type:varchar(64)[]"`
+	Read           pq.StringArray `gorm:"type:varchar(64)[]"`
+	Friends        pq.Int64Array  `gorm:"type:integer[]"`
+	FriendsPending pq.Int64Array  `gorm:"type:integer[]"`
+	FriendsRequest pq.Int64Array  `gorm:"type:integer[]"`
+	ReaderBlocked  pq.Int64Array  `gorm:"type:integer[]"`
+	PasswordHash   string
+	EmailHash      int64
+	Plural         bool
+	FavouriteBook  string
+	Books          []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
 }
 
 //Author type for database
@@ -290,6 +293,47 @@ func Start(db *gorm.DB) error {
 				tx = tx.Exec("DROP INDEX to_read_idx")
 				tx = tx.Exec("DROP INDEX liked_idx")
 				return tx.Exec("DROP INDEX library_idx").Error
+			},
+		},
+		{
+			ID: "Add Friend Info",
+			Migrate: func(tx *gorm.DB) error {
+				type Reader struct {
+					ID             uint       `gorm:"primary_key" json:"-"`
+					CreatedAt      time.Time  `json:"-"`
+					UpdatedAt      time.Time  `json:"-"`
+					DeletedAt      *time.Time `sql:"index" json:"-"`
+					Name           string
+					Pronouns       postgres.Jsonb
+					ProfileColour  string
+					Library        pq.StringArray `gorm:"type:varchar(64)[]"`
+					ToRead         pq.StringArray `gorm:"type:varchar(64)[]"`
+					Liked          pq.StringArray `gorm:"type:varchar(64)[]"`
+					Read           pq.StringArray `gorm:"type:varchar(64)[]"`
+					Friends        pq.Int64Array  `gorm:"type:integer[]"`
+					FriendsPending pq.Int64Array  `gorm:"type:integer[]"`
+					FriendsRequest pq.Int64Array  `gorm:"type:integer[]"`
+					ReaderBlocked  pq.Int64Array  `gorm:"type:integer[]"`
+					PasswordHash   string
+					EmailHash      int64
+					Plural         bool
+					FavouriteBook  string
+					Books          []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
+				}
+				tx = tx.AutoMigrate(&Reader{})
+				tx = tx.Exec("CREATE INDEX friends_pending_idx ON readers USING GIN (friends_pending)")
+				tx = tx.Exec("CREATE INDEX friends_request_idx ON readers USING GIN (friends_request)")
+				tx = tx.Exec("CREATE INDEX reader_blocked_idx ON readers USING GIN (reader_blocked_read)")
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				tx = tx.Model(&Reader{}).DropColumn("friends_pending")
+				tx = tx.Model(&Reader{}).DropColumn("friends_request")
+				tx = tx.Model(&Reader{}).DropColumn("reader_block")
+				tx = tx.Exec("DROP INDEX friends_pending_idx")
+				tx = tx.Exec("DROP INDEX friends_request_idx")
+				tx = tx.Exec("DROP INDEX reader_blocked_idx")
+				return tx.Error
 			},
 		},
 	})

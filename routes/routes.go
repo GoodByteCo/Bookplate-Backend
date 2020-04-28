@@ -419,6 +419,25 @@ func GetLibrary(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func AddFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	readerID := chi.URLParam(r, "readerID")
+	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	err := utils.AddFriend(uint(intReaderID), id)
+	if err != nil {
+		http.Error(w, "somthing went wrong", 500)
+		return
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
+
+	w.Write([]byte("friend thing did"))
+}
+
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{
 		AccountID:      os.Getenv("B2_ACCOUNT_ID"),

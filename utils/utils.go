@@ -35,6 +35,44 @@ import (
 
 type key string
 
+type arrayMod int
+
+const (
+	add arrayMod = iota
+	remove
+)
+
+func (a arrayMod) String() string {
+	return [...]string{"add", "remove"}[a]
+}
+
+func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint) (string, error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	var sql string
+	switch a {
+	case add:
+		set := fmt.Sprintf("array_append('%s', '%s')", changing, toChange)
+		sql, _, err := psql.Update("readers").Set(changing, set).Where("ID = ?", reader).ToSql()
+		if err != nil {
+			fmt.Println(err.Error())
+			return "", err
+		}
+		sql = strings.Replace(sql, "$1", set, 1)
+		sql = strings.Replace(sql, "$2", "$1", 1)
+	case remove:
+		set := fmt.Sprintf("array_remove(%s, '%s')", changing, toChange)
+		sql, test, err := psql.Update("readers").Set(changing, set).Where("ID = ?", reader).ToSql()
+		fmt.Println(test)
+		if err != nil {
+			fmt.Println(err.Error())
+			return "", err
+		}
+		sql = strings.Replace(sql, "$1", set, 1)
+		sql = strings.Replace(sql, "$2", "$1", 1)
+	}
+	return sql, nil
+}
+
 const (
 	ReaderKey     key = "reader_id"
 	AuthorKey     key = "author"
@@ -155,19 +193,11 @@ func CheckIfPresent(email string) (models.Reader, error) {
 func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
 	defer db.Close()
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-
-	setUpdate := fmt.Sprintf("array_append(%s, '%s')", listAdd.List, listAdd.BookID)
-	fmt.Println(setUpdate)
-	sql, test, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
-	fmt.Println(test)
+	sql, err := genArrayModifySQL(add, listAdd.List, listAdd.BookID, reader_id)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 	fmt.Println(sql)
-	sql = strings.Replace(sql, "$1", setUpdate, 1)
-	sql = strings.Replace(sql, "$2", "$1", 1)
 	db = db.Exec(sql, reader_id)
 	if listAdd.List == "liked" {
 		// checks is read if not add to read
@@ -189,20 +219,12 @@ func AddToBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 func DeleteFromBookList(reader_id uint, listAdd models.ReqBookListAdd) error {
 	db := bdb.ConnectToBook()
 	defer db.Close()
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-
-	setUpdate := fmt.Sprintf("array_remove(%s, '%s')", listAdd.List, listAdd.BookID)
-	fmt.Println(setUpdate)
-	sql, test, err := psql.Update("readers").Set(listAdd.List, setUpdate).Where("ID = ?", reader_id).ToSql()
-	fmt.Println(test)
+	sql, err := genArrayModifySQL(remove, listAdd.List, listAdd.BookID, reader_id)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
-	sql = strings.Replace(sql, "$1", setUpdate, 1)
-	sql = strings.Replace(sql, "$2", "$1", 1)
-	db = db.Exec(sql, reader_id)
 	fmt.Println(sql)
+	db = db.Exec(sql, reader_id)
 	return db.Error
 }
 
@@ -253,16 +275,20 @@ func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	db := bdb.ConnectToReader()
 	defer db.Close()
 	reader := models.Reader{
-		Name:          add.Name,
-		Pronouns:      pronouns,
-		Library:       []string{},
-		ToRead:        []string{},
-		Liked:         []string{},
-		Friends:       []int64{},
-		ProfileColour: randomcolor.GetRandomColorInHex(),
-		PasswordHash:  passwordHash,
-		EmailHash:     emailHash,
-		Plural:        false,
+		Name:           add.Name,
+		Pronouns:       pronouns,
+		Library:        []string{},
+		ToRead:         []string{},
+		Liked:          []string{},
+		Friends:        []int64{},
+		Read:           []string{},
+		FriendsPending: []int64{},
+		FriendsRequest: []int64{},
+		ReaderBlocked:  []int64{},
+		ProfileColour:  randomcolor.GetRandomColorInHex(),
+		PasswordHash:   passwordHash,
+		EmailHash:      emailHash,
+		Plural:         false,
 	}
 	if dbc := db.Create(&reader); dbc.Error != nil {
 		return 0, dbc.Error, nil
@@ -449,6 +475,59 @@ func MutualFriends(id uint) {
 	db := bdb.Connect()
 	defer db.Close()
 	db.Exec("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on readers.id = ANY (vtable.friends) WHERE vtable.id = ANY (readers.friends)", id)
+}
+
+func AddFriend(friendID uint, readerID uint) error {
+	friend := strconv.FormatUint(uint64(friendID), 10)
+	reader := strconv.FormatUint(uint64(readerID), 10)
+	// if responsed to request
+	type temp struct {
+		id uint
+	}
+	var tempid temp
+	db := bdb.Connect()
+	db.Raw("SELECT id from readers WHERE friends_request @> ARRAY[$1]::INT[] AND ID = $2", friendID, readerID).Scan(&tempid)
+	db.Close()
+	fmt.Println(tempid)
+	if tempid.id != 0 {
+		//add to friends for both
+		sqlR, err := genArrayModifySQL(add, "friends", friend, readerID)
+		if err != nil {
+			return err
+		}
+		sqlF, err := genArrayModifySQL(add, "friends", reader, friendID)
+		if err != nil {
+			return err
+		}
+		//remove from pending from friend
+		sqlRemPend, err := genArrayModifySQL(remove, "friends_pending", reader, friendID)
+		//remove from requested from you
+		sqlRemReq, err := genArrayModifySQL(remove, "friends_request", friend, readerID)
+
+		db := bdb.Connect()
+		defer db.Close()
+		db = db.Exec(sqlR, readerID)
+		db = db.Exec(sqlF, friendID)
+		db = db.Exec(sqlRemPend, friendID)
+		db = db.Exec(sqlRemReq, readerID)
+		return db.Error
+	} else { // if requesting
+		sqlPending, err := genArrayModifySQL(add, "friends_pending", friend, readerID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+		sqlRequest, err := genArrayModifySQL(add, "friends_request", reader, friendID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+		db := bdb.Connect()
+		defer db.Close()
+		db = db.Exec(sqlPending, readerID)
+		db = db.Exec(sqlRequest, friendID)
+		return db.Error
+	}
 }
 
 func binarySearch(searchWord string, list []string) bool {
