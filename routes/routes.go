@@ -14,6 +14,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
+	"github.com/pquerna/ffjson/ffjson"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
@@ -282,7 +283,7 @@ func GetReaderBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	list := utils.GetReaderBook(id, bookID)
-	js, err := json.Marshal(list)
+	js, err := ffjson.Marshal(list)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -323,7 +324,7 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) {
 		web := book.ToAllWebBook()
 		webBooks = append(webBooks, web)
 	}
-	js, err := json.Marshal(webBooks)
+	js, err := ffjson.Marshal(webBooks)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -340,7 +341,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := utils.GetProfile(reader)
-	js, err := json.Marshal(profile)
+	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -357,7 +358,7 @@ func GetLiked(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := utils.GetLiked(reader)
-	js, err := json.Marshal(profile)
+	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -375,7 +376,7 @@ func GetRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := utils.GetRead(reader)
-	js, err := json.Marshal(profile)
+	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -393,7 +394,7 @@ func GetToRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := utils.GetToRead(reader)
-	js, err := json.Marshal(profile)
+	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -411,7 +412,7 @@ func GetLibrary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := utils.GetLibrary(reader)
-	js, err := json.Marshal(profile)
+	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
 	}
