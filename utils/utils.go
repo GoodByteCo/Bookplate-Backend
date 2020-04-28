@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image/jpeg"
 	png2 "image/png"
@@ -49,7 +50,6 @@ func (a arrayMod) String() string {
 func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint) (string, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	readerID := strconv.FormatUint(uint64(reader), 10)
-	var sql string
 	switch a {
 	case add:
 		set := fmt.Sprintf("array_append(%s, '%s')", changing, toChange)
@@ -61,6 +61,7 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 		}
 		sql = strings.Replace(sql, "$1", set, 1)
 		sql = strings.Replace(sql, "$2", readerID, 1)
+		return sql, nil
 	case remove:
 		set := fmt.Sprintf("array_remove(%s, '%s')", changing, toChange)
 		fmt.Println(set)
@@ -72,8 +73,9 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 		fmt.Println(sql)
 		sql = strings.Replace(sql, "$1", set, 1)
 		sql = strings.Replace(sql, "$2", readerID, 1)
+		return sql, nil
 	}
-	return sql, nil
+	return "", errors.New("error")
 }
 
 const (
@@ -532,6 +534,7 @@ func AddFriend(friendID uint, readerID uint) error {
 			fmt.Println(err.Error())
 			return err
 		}
+
 		db := bdb.Connect()
 		defer db.Close()
 		db = db.Exec(sqlPending)
