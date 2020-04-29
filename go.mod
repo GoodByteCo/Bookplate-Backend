@@ -12,6 +12,7 @@ require (
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-chi/cors v1.1.1
 	github.com/go-chi/jwtauth v4.0.4+incompatible
+	github.com/go-redis/redis/v7 v7.2.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/readahead v0.0.0-20161222183148-eaceba169032 // indirect

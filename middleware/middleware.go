@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	db2 "github.com/GoodByteCo/Bookplate-Backend/db"
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
@@ -120,5 +121,11 @@ func AuthWare(next http.Handler) http.Handler {
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func CachingWare(duration time.Duration, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 	})
 }
