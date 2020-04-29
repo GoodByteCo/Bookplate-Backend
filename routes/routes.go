@@ -201,6 +201,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("uh oh")
 		fmt.Println(err.Error())
+		http.Error(w, "no user with that email", 401)
 		return
 		//no user redirect to create account
 	}
