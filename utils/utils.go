@@ -32,6 +32,7 @@ import (
 	"github.com/AvraamMavridis/randomcolor"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/cespare/xxhash"
+	"github.com/jinzhu/gorm"
 )
 
 type key string
@@ -488,9 +489,7 @@ func MutualFriends(id uint) {
 	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on ARRAY[readers.id] @> (vtable.friends) WHERE ARRAY[vtable.id] @> (readers.friends)", id)
 }
 
-func isMutualFriend(readerID uint, friendID uint) bool { // 3
-	db := bdb.Connect()
-	defer db.Close()
+func isMutualFriend(readerID uint, friendID uint, db *gorm.DB) bool { // 3
 	type temp struct {
 		ID uint
 	}
@@ -502,9 +501,7 @@ func isMutualFriend(readerID uint, friendID uint) bool { // 3
 	return false
 }
 
-func hasBlocked(readerID uint, friendID uint) bool { // 1
-	db := bdb.Connect()
-	defer db.Close()
+func hasBlocked(readerID uint, friendID uint, db *gorm.DB) bool { // 1
 	type temp struct {
 		ID uint
 	}
@@ -516,9 +513,7 @@ func hasBlocked(readerID uint, friendID uint) bool { // 1
 	return false
 }
 
-func blockedBy(readerID uint, friendID uint) bool { // 2
-	db := bdb.Connect()
-	defer db.Close()
+func blockedBy(readerID uint, friendID uint, db *gorm.DB) bool { // 2
 	type temp struct {
 		ID uint
 	}
@@ -531,9 +526,7 @@ func blockedBy(readerID uint, friendID uint) bool { // 2
 
 }
 
-func isPending(readerID uint, friendID uint) bool { // 4
-	db := bdb.Connect()
-	defer db.Close()
+func isPending(readerID uint, friendID uint, db *gorm.DB) bool { // 4
 	type temp struct {
 		ID uint
 	}
@@ -546,9 +539,7 @@ func isPending(readerID uint, friendID uint) bool { // 4
 
 }
 
-func isRequested(readerID uint, friendID uint) bool { //5
-	db := bdb.Connect()
-	defer db.Close()
+func isRequested(readerID uint, friendID uint, db *gorm.DB) bool { //5
 	type temp struct {
 		ID uint
 	}
@@ -617,15 +608,17 @@ func AddFriend(friendID uint, readerID uint) error {
 }
 
 func GetStatus(readerID uint, friendID uint) models.Status {
-	if hasBlocked(readerID, friendID) {
+	db := bdb.Connect()
+	defer db.Close()
+	if hasBlocked(readerID, friendID, db) {
 		return models.Status{Status: "Unblock"}
-	} else if blockedBy(readerID, friendID) {
+	} else if blockedBy(readerID, friendID, db) {
 		return models.Status{Status: "Add Friend"}
-	} else if isMutualFriend(readerID, friendID) {
+	} else if isMutualFriend(readerID, friendID, db) {
 		return models.Status{Status: "Remove Friends"}
-	} else if isPending(readerID, friendID) {
+	} else if isPending(readerID, friendID, db) {
 		return models.Status{Status: "Pending"}
-	} else if isRequested(readerID, friendID) {
+	} else if isRequested(readerID, friendID, db) {
 		return models.Status{Status: "Accept Friend"}
 	} else {
 		return models.Status{Status: "Add Friend"}
