@@ -83,6 +83,10 @@ func main() {
 		})
 
 		r.Route("/reader", func(r chi.Router) {
+			r.Use(middleware.LoginWare)
+			r.Route("/profile", func(r chi.Router) {
+				r.Get("/{readerID}", routes.GetReaderProfile)
+			})
 			r.Route("/book", func(r chi.Router) {
 				r.Get("/{bookID}", routes.GetReaderBook)
 			})

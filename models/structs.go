@@ -108,6 +108,10 @@ type Authors []Author
 
 type ResBooksForAuthor []ResBookForAuthor
 
+type Status struct {
+	Status string
+}
+
 //Info when asking for all books
 type AllWebBook struct {
 	BookId    string `json:"book_id"`

@@ -485,7 +485,79 @@ func GetLibrary(reader models.Reader) models.ReqProfileList {
 func MutualFriends(id uint) {
 	db := bdb.Connect()
 	defer db.Close()
-	db.Exec("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on readers.id = ANY (vtable.friends) WHERE vtable.id = ANY (readers.friends)", id)
+	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select ID,friends from readers where ID = $1) as vtable on ARRAY[readers.id] @> (vtable.friends) WHERE ARRAY[vtable.id] @> (readers.friends)", id)
+}
+
+func isMutualFriend(readerID uint, friendID uint) bool { // 3
+	db := bdb.Connect()
+	defer db.Close()
+	type temp struct {
+		ID uint
+	}
+	var tempid temp
+	db.Raw("select readers.ID from readers inner join (select ID,friends from readers where ID = $1) as vtable on ARRAY[readers.id] @> (vtable.friends) WHERE ARRAY[vtable.id] @> (readers.friends) AND readers.ID = $2", readerID, friendID).Scan(&tempid)
+	if tempid.ID != 0 {
+		return true
+	}
+	return false
+}
+
+func hasBlocked(readerID uint, friendID uint) bool { // 1
+	db := bdb.Connect()
+	defer db.Close()
+	type temp struct {
+		ID uint
+	}
+	var tempid temp
+	db.Raw("select ID from readers where ARRAY[$2]::INT[] <@ reader_blocked and ID = $1", readerID, friendID).Scan(&tempid)
+	if tempid.ID != 0 {
+		return true
+	}
+	return false
+}
+
+func blockedBy(readerID uint, friendID uint) bool { // 2
+	db := bdb.Connect()
+	defer db.Close()
+	type temp struct {
+		ID uint
+	}
+	var tempid temp
+	db.Raw("select ID from readers where ARRAY[$1]::INT[] <@ reader_blocked and ID = $2", readerID, friendID).Scan(&tempid)
+	if tempid.ID != 0 {
+		return true
+	}
+	return false
+
+}
+
+func isPending(readerID uint, friendID uint) bool { // 4
+	db := bdb.Connect()
+	defer db.Close()
+	type temp struct {
+		ID uint
+	}
+	var tempid temp
+	db.Raw("select readers.ID from readers inner join (select ID,friends_pending from readers where ID = $1) as vtable on ARRAY[readers.id] <@ (vtable.friends_pending) WHERE ARRAY[vtable.id] <@ (readers.friends_request) AND readers.ID = $2", readerID, friendID).Scan(&tempid)
+	if tempid.ID != 0 {
+		return true
+	}
+	return false
+
+}
+
+func isRequested(readerID uint, friendID uint) bool { //5
+	db := bdb.Connect()
+	defer db.Close()
+	type temp struct {
+		ID uint
+	}
+	var tempid temp
+	db.Raw("select readers.ID from readers inner join (select ID,friends_request from readers where ID = $1) as vtable on ARRAY[readers.id] <@ (vtable.friends_request) WHERE ARRAY[vtable.id] <@ (readers.friends_pending) AND readers.ID = $2", readerID, friendID).Scan(&tempid)
+	if tempid.ID != 0 {
+		return true
+	}
+	return false
 }
 
 func AddFriend(friendID uint, readerID uint) error {
@@ -541,6 +613,22 @@ func AddFriend(friendID uint, readerID uint) error {
 		db = db.Exec(sqlPending, readerID)
 		db = db.Exec(sqlRequest, friendID)
 		return db.Error
+	}
+}
+
+func GetStatus(readerID uint, friendID uint) models.Status {
+	if hasBlocked(readerID, friendID) {
+		return models.Status{Status: "Unblock"}
+	} else if blockedBy(readerID, friendID) {
+		return models.Status{Status: "Add Friend"}
+	} else if isMutualFriend(readerID, friendID) {
+		return models.Status{Status: "Remove Friends"}
+	} else if isPending(readerID, friendID) {
+		return models.Status{Status: "Pending"}
+	} else if isRequested(readerID, friendID) {
+		return models.Status{Status: "Accept Friend"}
+	} else {
+		return models.Status{Status: "Add Friend"}
 	}
 }
 

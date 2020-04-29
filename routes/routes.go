@@ -273,17 +273,26 @@ func GetReaderBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	bookID := chi.URLParam(r, "bookID")
 	ctx := r.Context()
-	id, ok := ctx.Value(utils.ReaderKey).(uint)
-	if !ok {
-		http.Error(w, "not logged in", 401)
-		return
-	}
-	if id == 0 {
-		http.Error(w, "not logged in", 401)
-		return
-	}
+	id, _ := ctx.Value(utils.ReaderKey).(uint)
 	list := utils.GetReaderBook(id, bookID)
 	js, err := ffjson.Marshal(list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+
+}
+
+func GetReaderProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	readerID := chi.URLParam(r, "readerID")
+	ctx := r.Context()
+	id, _ := ctx.Value(utils.ReaderKey).(uint)
+	reader, _ := strconv.ParseUint(readerID, 10, 64)
+
+	status := utils.GetStatus(id, uint(reader))
+	js, err := ffjson.Marshal(status)
 	if err != nil {
 		fmt.Println(err)
 	}
