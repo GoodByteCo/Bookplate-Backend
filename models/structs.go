@@ -109,7 +109,7 @@ type Authors []Author
 type ResBooksForAuthor []ResBookForAuthor
 
 type Status struct {
-	Status string
+	Status string `json:"status"`
 }
 
 //Info when asking for all books
