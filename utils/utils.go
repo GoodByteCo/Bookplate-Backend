@@ -495,7 +495,7 @@ func isMutualFriend(readerID uint, friendID uint) bool { // 3
 		ID uint
 	}
 	var tempid temp
-	db.Raw("select readers.ID from readers inner join (select ID,friends from readers where ID = $1) as vtable on ARRAY[readers.id] @> (vtable.friends) WHERE ARRAY[vtable.id] @> (readers.friends) AND readers.ID = $2", readerID, friendID).Scan(&tempid)
+	db.Raw("select readers.ID from readers inner join (select ID,friends from readers where ID = $1) as vtable on ARRAY[readers.id] <@ (vtable.friends) WHERE ARRAY[vtable.id] <@ (readers.friends) AND readers.ID = $2", readerID, friendID).Scan(&tempid)
 	if tempid.ID != 0 {
 		return true
 	}
