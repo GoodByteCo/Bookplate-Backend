@@ -615,7 +615,7 @@ func GetStatus(readerID uint, friendID uint) models.Status {
 	} else if blockedBy(readerID, friendID, db) {
 		return models.Status{Status: "Add Friend"}
 	} else if isMutualFriend(readerID, friendID, db) {
-		return models.Status{Status: "Remove Friends"}
+		return models.Status{Status: "Remove Friend"}
 	} else if isPending(readerID, friendID, db) {
 		return models.Status{Status: "Pending"}
 	} else if isRequested(readerID, friendID, db) {
