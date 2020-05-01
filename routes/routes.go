@@ -290,8 +290,10 @@ func GetReaderProfile(w http.ResponseWriter, r *http.Request) {
 	readerID := chi.URLParam(r, "readerID")
 	ctx := r.Context()
 	id, _ := ctx.Value(utils.ReaderKey).(uint)
-	reader, _ := strconv.ParseUint(readerID, 10, 64)
-
+	reader, err := strconv.ParseUint(readerID, 10, 64)
+	if err != nil {
+		http.Error(w, "readers are not strings", 404)
+	}
 	status := utils.GetStatus(id, uint(reader))
 	js, err := ffjson.Marshal(status)
 	if err != nil {
