@@ -292,9 +292,9 @@ func GetReaderProfile(w http.ResponseWriter, r *http.Request) {
 	id, _ := ctx.Value(utils.ReaderKey).(uint)
 	reader, err := strconv.ParseUint(readerID, 10, 64)
 	fmt.Println(err)
-	// if err != nil {
-	// 	http.Error(w, "readers are not strings", 404)
-	// }
+	if err != nil {
+		http.Error(w, "readers are not strings", 404)
+	}
 	status := utils.GetStatus(id, uint(reader))
 	js, err := ffjson.Marshal(status)
 	if err != nil {
