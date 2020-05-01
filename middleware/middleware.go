@@ -50,7 +50,15 @@ func AuthorCtx(next http.Handler) http.Handler {
 func ReaderWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		readerID := chi.URLParam(r, "readerID")
-		intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+		intReaderID, err := strconv.ParseUint(readerID, 10, 64)
+		if err != nil {
+			http.Error(w, "not a user", 404)
+			return
+		}
+		if intReaderID == 0 {
+			http.Error(w, "not a user", 404)
+			return
+		}
 		var reader models.Reader
 		db := db2.Connect()
 		defer db.Close()
