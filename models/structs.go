@@ -8,7 +8,7 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
-//Reader gotten from Request to add reader
+//ReqReader Reader gotten from Request to add reader
 type ReqReader struct {
 	Name     string  `json:"name"`
 	Pronouns Pronoun `json:"pronouns"`
@@ -65,7 +65,6 @@ type Friend struct {
 
 type Friends []Friend
 
-//Book info sent to site
 type ResGetFriends struct {
 	Name          string  `json:"name"`
 	ProfileColour string  `json:"profile_color"`
