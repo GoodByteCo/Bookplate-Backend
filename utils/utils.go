@@ -630,17 +630,21 @@ func GetFriends(friend models.Reader, readerID uint) models.ResGetFriends {
 	}
 }
 
-func GetReaderFriendsFriends(friend models.Reader, readerID uint) map[uint]string {
+func GetReaderFriends(friend models.Reader, readerID uint) (map[uint]string, error) {
+	if friend.ID == readerID {
+		return nil, errors.New("same person")
+	}
 	db := bdb.Connect()
 	if !isMutualFriend(readerID, friend.ID, db) {
-		return nil
+		return nil, errors.New("not mutual friends")
 	}
+	db.Close()
 	var maping map[uint]string
 	for _, f := range friend.Friends {
 		status := GetStatus(readerID, uint(f))
 		maping[uint(f)] = status.Status
 	}
-	return maping
+	return maping, nil
 }
 
 func AddBlocked(friendID uint, readerID uint) error {

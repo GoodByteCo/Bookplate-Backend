@@ -65,7 +65,10 @@ func main() {
 				r.Get("/library", routes.GetLibrary)
 				r.Get("/read", routes.GetRead)
 				r.Get("/to-read", routes.GetToRead)
-				r.Get("/friends", routes.GetFriends)
+				r.Route("/friends", func(r chi.Router) {
+					r.Use(middleware.AuthWare)
+					r.Get("/", routes.GetFriends)
+				})
 			})
 		})
 
@@ -87,7 +90,14 @@ func main() {
 		r.Route("/reader", func(r chi.Router) {
 			r.Use(middleware.LoginWare)
 			r.Route("/profile", func(r chi.Router) {
-				r.Get("/{readerID}", routes.GetReaderProfile)
+				r.Route("/{readerID}", func(r chi.Router) {
+					r.Use(middleware.ReaderWare)
+					r.Get("/", routes.GetReaderProfile)
+					r.Route("/friends", func(r chi.Router) {
+						r.Use(middleware.AuthWare)
+						r.Get("/", routes.GetReaderFriends)
+					})
+				})
 			})
 			r.Route("/book", func(r chi.Router) {
 				r.Route("/{bookID}", func(r chi.Router) {

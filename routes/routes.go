@@ -444,7 +444,7 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 	}
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
 	if !ok {
-		http.Error(w, "not logged", 404)
+		http.Error(w, "not logged in", 404)
 		return
 	}
 	friends := utils.GetFriends(friend, id)
@@ -452,11 +452,42 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "deal with later", 404)
 	}
 	if friends.Friends == nil {
-		http.Error(w, "not mutualFriens", 403)
+		http.Error(w, "not mutual friends", 403)
 		return
 
 	}
 	js, err := ffjson.Marshal(friends)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+}
+
+func GetReaderFriends(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	friend, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		http.Error(w, "not a person", 404)
+		return
+	}
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		http.Error(w, "not logged in", 404)
+		return
+	}
+	maping, err := utils.GetReaderFriends(friend, id)
+	if err != nil {
+		if err.Error() == "same person" {
+			http.Error(w, "not a person", 404)
+			return
+		} else if err.Error() == "not mutual friends" {
+			http.Error(w, "not mutual friends", 403)
+			return
+		}
+	}
+	js, err := ffjson.Marshal(maping)
 	if err != nil {
 		fmt.Println(err)
 	}
