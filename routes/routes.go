@@ -65,8 +65,8 @@ func UploadBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	url = strings.ReplaceAll(url, start, replace)
 	w.Write([]byte(url))
-
 }
+
 func AddBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	decoder := json.NewDecoder(r.Body)
@@ -449,6 +449,34 @@ func AddFriend(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
 
 	w.Write([]byte("friend thing did"))
+}
+
+func RemoveFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	readerID := chi.URLParam(r, "readerID")
+	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+	db := bdb.Connect()
+	defer db.Close()
+	reader := models.Reader{}
+	not := db.Where(models.Reader{ID: uint(intReaderID)}).First(&reader).RecordNotFound()
+	if not == true {
+		http.Error(w, "reader doesn't exist", 404)
+		return
+	}
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	err := utils.RemoveFriends(uint(intReaderID), id)
+	if err != nil {
+		http.Error(w, "somthing went wrong", 500)
+		return
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
+
+	w.Write([]byte("friend removed"))
+
 }
 
 func getBucket() *backblaze.Bucket {

@@ -138,6 +138,7 @@ func CheckBook(next http.Handler) http.Handler {
 			bookId := chi.URLParam(r, "bookID")
 			book := models.Book{}
 			db := db2.Connect()
+			defer db.Close()
 			not := db.Where(models.Book{BookID: bookId}).First(&book).RecordNotFound()
 			fmt.Println(not)
 			if not == true {

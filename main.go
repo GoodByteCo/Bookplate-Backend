@@ -71,7 +71,7 @@ func main() {
 		r.Route("/friend", func(r chi.Router) {
 			r.Use(middleware.AuthWare)
 			r.Post("/add/{readerID}", routes.AddFriend)
-			// r.Post("/remove/{readerID}")
+			r.Post("/remove/{readerID}", routes.RemoveFriend)
 			// r.Post("/blocked/{readerID}")
 		})
 

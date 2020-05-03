@@ -551,6 +551,48 @@ func isRequested(readerID uint, friendID uint, db *gorm.DB) bool { //5
 	return false
 }
 
+func RemoveFriends(friendID uint, readerID uint) error {
+	friend := strconv.FormatUint(uint64(friendID), 10)
+	reader := strconv.FormatUint(uint64(readerID), 10)
+
+	sqlFf, err := genArrayModifySQL(remove, "friends", reader, friendID)
+	if err != nil {
+		return err
+	}
+	sqlFr, err := genArrayModifySQL(remove, "friends", friend, readerID)
+	if err != nil {
+		return err
+	}
+	sqlRf, err := genArrayModifySQL(remove, "friends_request", reader, friendID)
+	if err != nil {
+		return err
+	}
+	sqlRr, err := genArrayModifySQL(remove, "friends_request", friend, readerID)
+	if err != nil {
+		return err
+	}
+	sqlPf, err := genArrayModifySQL(remove, "friends_pending", reader, friendID)
+	if err != nil {
+		return err
+	}
+	sqlPr, err := genArrayModifySQL(remove, "friends_pending", friend, readerID)
+	if err != nil {
+		return err
+	}
+
+	db := bdb.Connect()
+	defer db.Close()
+
+	db = db.Exec(sqlFf, friendID)
+	db = db.Exec(sqlRf, friendID)
+	db = db.Exec(sqlPf, friendID)
+	db = db.Exec(sqlFr, readerID)
+	db = db.Exec(sqlRr, readerID)
+	db = db.Exec(sqlPr, readerID)
+	return db.Error
+
+}
+
 func AddFriend(friendID uint, readerID uint) error {
 	friend := strconv.FormatUint(uint64(friendID), 10)
 	reader := strconv.FormatUint(uint64(readerID), 10)
