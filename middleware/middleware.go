@@ -139,9 +139,9 @@ func CheckBook(next http.Handler) http.Handler {
 			book := models.Book{}
 			db := db2.Connect()
 			defer db.Close()
-			not := db.Where(models.Book{BookID: bookId}).First(&book).RecordNotFound()
-			fmt.Println(not)
-			if not == true {
+			db.Where(models.Book{BookID: bookId}).First(&book)
+			fmt.Println(book)
+			if book.Title == "" {
 				http.Error(w, "book doesn't exist", 404)
 				return
 			}
