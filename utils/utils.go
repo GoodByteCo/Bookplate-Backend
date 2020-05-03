@@ -604,7 +604,7 @@ func GetFriends(friend models.Reader, readerID uint) []models.Friend {
 	var friends models.Friends
 	for _, r := range friend.Friends {
 		var fReader models.Reader
-		db.Select("id, name, profile_color").Where(models.Reader{ID: uint(r)}).Find(&fReader)
+		db.Select("id, name, profile_colour").Where(models.Reader{ID: uint(r)}).Find(&fReader)
 		friendAdd := models.Friend{
 			ID:            fReader.ID,
 			Name:          fReader.Name,
