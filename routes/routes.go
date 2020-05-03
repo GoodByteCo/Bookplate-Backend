@@ -447,8 +447,13 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "not logged", 404)
 		return
 	}
-	profile := utils.GetFriends(friend, id)
-	js, err := ffjson.Marshal(profile)
+	friends := utils.GetFriends(friend, id)
+	if friends == nil {
+		http.Error(w, "not mutualFriens", 403)
+		return
+
+	}
+	js, err := ffjson.Marshal(friends)
 	if err != nil {
 		fmt.Println(err)
 	}
