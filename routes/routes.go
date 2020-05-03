@@ -502,6 +502,11 @@ func BlockReader(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "somthing went wrong", 500)
 		return
 	}
+	err = utils.RemoveFriends(uint(intReaderID), id)
+	if err != nil {
+		http.Error(w, "somthing went wrong", 500)
+		return
+	}
 	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
 
 	w.Write([]byte("reader Blocked"))
