@@ -72,7 +72,8 @@ func main() {
 			r.Use(middleware.AuthWare)
 			r.Post("/add/{readerID}", routes.AddFriend)
 			r.Post("/remove/{readerID}", routes.RemoveFriend)
-			// r.Post("/blocked/{readerID}")
+			r.Post("/block/{readerID}", routes.BlockReader)
+			r.Post("/unblock/{readerID}", routes.UnblockReader)
 		})
 
 		r.Route("/author", func(r chi.Router) {
