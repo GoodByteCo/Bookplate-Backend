@@ -437,16 +437,17 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	w.Header().Set("Content-Type", "application/json")
 	ctx := r.Context()
-	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	friend, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
 	if !ok {
 		http.Error(w, "not a person", 404)
 		return
 	}
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
 	if !ok {
+		http.Error(w, "not logged", 404)
 		return
 	}
-	profile := utils.GetFriends(reader.ID, id)
+	profile := utils.GetFriends(friend, id)
 	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)

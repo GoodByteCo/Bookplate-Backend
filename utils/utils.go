@@ -596,23 +596,21 @@ func RemoveFriends(friendID uint, readerID uint) error {
 
 }
 
-func GetFriends(friendID, readerID uint) []models.Friend {
+func GetFriends(friend models.Reader, readerID uint) []models.Friend {
 	db := bdb.Connect()
-	if !isMutualFriend(readerID, friendID, db) {
+	if !isMutualFriend(readerID, friend.ID, db) {
 		return nil
 	}
-	reader := models.Reader{}
-	var friends []models.Friend
-	db.Select("friends").Where(models.Reader{ID: friendID}).Find(&reader)
-	for _, r := range reader.Friends {
+	var friends models.Friends
+	for _, r := range friend.Friends {
 		var fReader models.Reader
 		db.Select("id, name, profile_color").Where(models.Reader{ID: uint(r)}).Find(&fReader)
-		friend := models.Friend{
+		friendAdd := models.Friend{
 			ID:            fReader.ID,
 			Name:          fReader.Name,
 			ProfileColour: fReader.ProfileColour,
 		}
-		friends = append(friends, friend)
+		friends = append(friends, friendAdd)
 	}
 	db.Close()
 	return friends
