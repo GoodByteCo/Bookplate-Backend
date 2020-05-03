@@ -66,6 +66,14 @@ type Friend struct {
 type Friends []Friend
 
 //Book info sent to site
+type ResGetFriends struct {
+	Name          string  `json:"name"`
+	ProfileColour string  `json:"profile_color"`
+	Pronoun       string  `json:"pronoun"`
+	Friends       Friends `json:"friends"`
+}
+
+//ResWebBook Book info sent to site
 type ResWebBook struct {
 	Title       string            `json:"title"`
 	Year        string            `json:"year"`
