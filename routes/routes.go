@@ -80,6 +80,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	bID, err := utils.AddBook(book, id)
 	if err != nil {
 		fmt.Println(err)
+		http.Error(w, "internal server Error", http.StatusInternalServerError)
 		return
 	}
 	js, _ := json.Marshal(bID)
@@ -456,9 +457,9 @@ func RemoveFriend(w http.ResponseWriter, r *http.Request) {
 	readerID := chi.URLParam(r, "readerID")
 	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
 	db := bdb.Connect()
-	defer db.Close()
 	reader := models.Reader{}
 	not := db.Where(models.Reader{ID: uint(intReaderID)}).First(&reader).RecordNotFound()
+	db.Close()
 	if not == true {
 		http.Error(w, "reader doesn't exist", 404)
 		return
@@ -476,6 +477,61 @@ func RemoveFriend(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
 
 	w.Write([]byte("friend removed"))
+
+}
+
+func BlockReader(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	readerID := chi.URLParam(r, "readerID")
+	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+	db := bdb.Connect()
+	reader := models.Reader{}
+	not := db.Where(models.Reader{ID: uint(intReaderID)}).First(&reader).RecordNotFound()
+	db.Close()
+	if not == true {
+		http.Error(w, "reader doesn't exist", 404)
+		return
+	}
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	err := utils.AddBlocked(uint(intReaderID), id)
+	if err != nil {
+		http.Error(w, "somthing went wrong", 500)
+		return
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
+
+	w.Write([]byte("reader Blocked"))
+
+}
+func UnblockReader(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	readerID := chi.URLParam(r, "readerID")
+	intReaderID, _ := strconv.ParseUint(readerID, 10, 64)
+	db := bdb.Connect()
+	reader := models.Reader{}
+	not := db.Where(models.Reader{ID: uint(intReaderID)}).First(&reader).RecordNotFound()
+	db.Close()
+	if not == true {
+		http.Error(w, "reader doesn't exist", 404)
+		return
+	}
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	err := utils.RemoveBlocked(uint(intReaderID), id)
+	if err != nil {
+		http.Error(w, "somthing went wrong", 500)
+		return
+	}
+	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
+
+	w.Write([]byte("reader Unblocked"))
 
 }
 

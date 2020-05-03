@@ -251,7 +251,10 @@ func AddBook(add models.ReqWebBook, reader_id uint) (string, error) {
 			authors[i] = a
 		}
 	}
-	year, _ := strconv.Atoi(add.Year)
+	year, err := strconv.Atoi(add.Year)
+	if err != nil {
+		return "", err
+	}
 	fmt.Println(add.Authors)
 	book := models.Book{
 		BookID:      "",
@@ -591,6 +594,34 @@ func RemoveFriends(friendID uint, readerID uint) error {
 	db = db.Exec(sqlPr, readerID)
 	return db.Error
 
+}
+
+func AddBlocked(friendID uint, readerID uint) error {
+	friend := strconv.FormatUint(uint64(friendID), 10)
+
+	sql, err := genArrayModifySQL(add, "reader_blocked", friend, readerID)
+	if err != nil {
+		return err
+	}
+	db := bdb.Connect()
+	defer db.Close()
+
+	db = db.Exec(sql, readerID)
+	return db.Error
+}
+
+func RemoveBlocked(friendID uint, readerID uint) error {
+	friend := strconv.FormatUint(uint64(friendID), 10)
+
+	sql, err := genArrayModifySQL(remove, "reader_blocked", friend, readerID)
+	if err != nil {
+		return err
+	}
+	db := bdb.Connect()
+	defer db.Close()
+
+	db = db.Exec(sql, readerID)
+	return db.Error
 }
 
 func AddFriend(friendID uint, readerID uint) error {
