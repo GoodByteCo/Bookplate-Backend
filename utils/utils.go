@@ -639,7 +639,7 @@ func GetReaderFriends(friend models.Reader, readerID uint) (map[uint]string, err
 		return nil, errors.New("not mutual friends")
 	}
 	db.Close()
-	var maping map[uint]string
+	maping := make(map[uint]string)
 	for _, f := range friend.Friends {
 		status := GetStatus(readerID, uint(f))
 		maping[uint(f)] = status.Status
