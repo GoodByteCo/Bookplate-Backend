@@ -602,9 +602,18 @@ func GetFriends(friend models.Reader, readerID uint) models.ResGetFriends {
 			Name: "Same person", // is a hack
 		}
 	}
+	var pronoun models.Pronoun
+	jsonPro := []byte(friend.Pronouns.RawMessage)
+	json.Unmarshal(jsonPro, &pronoun)
 	db := bdb.Connect()
 	if !isMutualFriend(readerID, friend.ID, db) {
-		return models.ResGetFriends{}
+		return models.ResGetFriends{
+			Name:          friend.Name,
+			ProfileColour: friend.ProfileColour,
+			Pronoun:       pronoun.Possessive,
+			Friends:       nil,
+		}
+
 	}
 	var friends models.Friends
 	for _, r := range friend.Friends {
@@ -618,10 +627,6 @@ func GetFriends(friend models.Reader, readerID uint) models.ResGetFriends {
 		friends = append(friends, friendAdd)
 	}
 	db.Close()
-	var pronoun models.Pronoun
-	jsonPro := []byte(friend.Pronouns.RawMessage)
-	json.Unmarshal(jsonPro, &pronoun)
-
 	return models.ResGetFriends{
 		Name:          friend.Name,
 		ProfileColour: friend.ProfileColour,

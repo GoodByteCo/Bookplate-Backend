@@ -452,9 +452,13 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "deal with later", 404)
 	}
 	if friends.Friends == nil {
-		http.Error(w, "not mutual friends", 403)
+		w.WriteHeader(403)
+		js, err := ffjson.Marshal(friends)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.Write(js)
 		return
-
 	}
 	js, err := ffjson.Marshal(friends)
 	if err != nil {
