@@ -448,7 +448,10 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	friends := utils.GetFriends(friend, id)
-	if friends == nil {
+	if friends.Name == "Same person" {
+		http.Error(w, "deal with later", 404)
+	}
+	if friends.Friends == nil {
 		http.Error(w, "not mutualFriens", 403)
 		return
 

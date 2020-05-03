@@ -596,10 +596,15 @@ func RemoveFriends(friendID uint, readerID uint) error {
 
 }
 
-func GetFriends(friend models.Reader, readerID uint) []models.Friend {
+func GetFriends(friend models.Reader, readerID uint) models.ResGetFriends {
+	if readerID == friend.ID {
+		return models.ResGetFriends{
+			Name: "Same person", // is a hack
+		}
+	}
 	db := bdb.Connect()
 	if !isMutualFriend(readerID, friend.ID, db) {
-		return nil
+		return models.ResGetFriends{}
 	}
 	var friends models.Friends
 	for _, r := range friend.Friends {
@@ -613,18 +618,25 @@ func GetFriends(friend models.Reader, readerID uint) []models.Friend {
 		friends = append(friends, friendAdd)
 	}
 	db.Close()
-	return friends
+	var pronoun models.Pronoun
+	jsonPro := []byte(friend.Pronouns.RawMessage)
+	json.Unmarshal(jsonPro, &pronoun)
+
+	return models.ResGetFriends{
+		Name:          friend.Name,
+		ProfileColour: friend.ProfileColour,
+		Pronoun:       pronoun.Possessive,
+		Friends:       friends,
+	}
 }
 
-func GetReaderFriendsFriends(friendID, readerID uint) map[uint]string {
+func GetReaderFriendsFriends(friend models.Reader, readerID uint) map[uint]string {
 	db := bdb.Connect()
-	if !isMutualFriend(readerID, friendID, db) {
+	if !isMutualFriend(readerID, friend.ID, db) {
 		return nil
 	}
-	reader := models.Reader{}
-	db.Select("friends").Where(models.Reader{ID: friendID}).Find(&reader)
 	var maping map[uint]string
-	for _, f := range reader.Friends {
+	for _, f := range friend.Friends {
 		status := GetStatus(readerID, uint(f))
 		maping[uint(f)] = status.Status
 	}
