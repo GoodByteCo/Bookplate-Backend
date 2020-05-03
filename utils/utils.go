@@ -596,6 +596,43 @@ func RemoveFriends(friendID uint, readerID uint) error {
 
 }
 
+func GetFriends(friendID, readerID uint) []models.Friend {
+	db := bdb.Connect()
+	if !isMutualFriend(readerID, friendID, db) {
+		return nil
+	}
+	reader := models.Reader{}
+	var friends []models.Friend
+	db.Select("friends").Where(models.Reader{ID: friendID}).Find(&reader)
+	for _, r := range reader.Friends {
+		var fReader models.Reader
+		db.Select("id, name, profile_color").Where(models.Reader{ID: uint(r)}).Find(&fReader)
+		friend := models.Friend{
+			ID:            fReader.ID,
+			Name:          fReader.Name,
+			ProfileColour: fReader.ProfileColour,
+		}
+		friends = append(friends, friend)
+	}
+	db.Close()
+	return friends
+}
+
+func GetReaderFriendsFriends(friendID, readerID uint) map[uint]string {
+	db := bdb.Connect()
+	if !isMutualFriend(readerID, friendID, db) {
+		return nil
+	}
+	reader := models.Reader{}
+	db.Select("friends").Where(models.Reader{ID: friendID}).Find(&reader)
+	var maping map[uint]string
+	for _, f := range reader.Friends {
+		status := GetStatus(readerID, uint(f))
+		maping[uint(f)] = status.Status
+	}
+	return maping
+}
+
 func AddBlocked(friendID uint, readerID uint) error {
 	friend := strconv.FormatUint(uint64(friendID), 10)
 

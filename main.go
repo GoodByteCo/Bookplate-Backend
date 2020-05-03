@@ -65,6 +65,7 @@ func main() {
 				r.Get("/library", routes.GetLibrary)
 				r.Get("/read", routes.GetRead)
 				r.Get("/to-read", routes.GetToRead)
+				r.Get("/friends", routes.GetFriends)
 			})
 		})
 

@@ -433,6 +433,27 @@ func GetLibrary(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func GetFriends(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	ctx := r.Context()
+	reader, ok := ctx.Value(utils.ReaderUserKey).(models.Reader)
+	if !ok {
+		http.Error(w, "not a person", 404)
+		return
+	}
+	id, ok := ctx.Value(utils.ReaderKey).(uint)
+	if !ok {
+		return
+	}
+	profile := utils.GetFriends(reader.ID, id)
+	js, err := ffjson.Marshal(profile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(js)
+}
+
 func AddFriend(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	readerID := chi.URLParam(r, "readerID")
