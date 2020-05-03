@@ -132,6 +132,22 @@ func AuthWare(next http.Handler) http.Handler {
 	})
 }
 
+func CheckBook(next http.Handler) http.Handler {
+	{
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			bookId := chi.URLParam(r, "bookID")
+			book := models.Book{}
+			db := db2.Connect()
+			not := db.Where(models.Book{BookID: bookId}).First(&book).RecordNotFound()
+			if not == true {
+				http.Error(w, "book doesn't exist", 401)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func CachingWare(duration time.Duration, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
