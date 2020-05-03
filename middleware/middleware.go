@@ -141,7 +141,7 @@ func CheckBook(next http.Handler) http.Handler {
 			not := db.Where(models.Book{BookID: bookId}).First(&book).RecordNotFound()
 			fmt.Println(not)
 			if not == true {
-				http.Error(w, "book doesn't exist", 401)
+				http.Error(w, "book doesn't exist", 404)
 				return
 			}
 			next.ServeHTTP(w, r)
