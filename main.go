@@ -66,7 +66,6 @@ func main() {
 				r.Get("/read", routes.GetRead)
 				r.Get("/to-read", routes.GetToRead)
 				r.Route("/friends", func(r chi.Router) {
-					r.Use(middleware.AuthWare)
 					r.Get("/", routes.GetFriends)
 				})
 			})
