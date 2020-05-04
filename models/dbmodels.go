@@ -75,7 +75,8 @@ type Reader struct {
 	EmailHash      int64
 	Plural         bool
 	FavouriteBook  string
-	Books          []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
+	Books          []Book //Book added by reader
+	ForgotPassword ForgotPassword
 }
 
 //Author type for database
@@ -113,10 +114,10 @@ func (a *Author) SetStringId() {
 	}
 }
 
-type NameSearch struct {
-	BookAndAuthor string
-	Author        Author
-	Book          Book
+type ForgotPassword struct {
+	gorm.Model
+	ReaderID  uint
+	RandomKey string
 }
 
 //Migration Function Update as database structs change
@@ -318,7 +319,7 @@ func Start(db *gorm.DB) error {
 					EmailHash      int64
 					Plural         bool
 					FavouriteBook  string
-					Books          []Book `gorm:"foreignkey:ReaderAddedId"` //Book added by reader
+					Books          []Book //Book added by reader
 				}
 				tx = tx.AutoMigrate(&Reader{})
 				tx = tx.Exec("CREATE INDEX friends_pending_idx ON readers USING GIN (friends_pending)")
@@ -334,6 +335,45 @@ func Start(db *gorm.DB) error {
 				tx = tx.Exec("DROP INDEX friends_request_idx")
 				tx = tx.Exec("DROP INDEX reader_blocked_idx")
 				return tx.Error
+			},
+		},
+		{
+			ID: "Add forgot password field",
+			Migrate: func(tx *gorm.DB) error {
+				type Reader struct {
+					ID             uint       `gorm:"primary_key" json:"-"`
+					CreatedAt      time.Time  `json:"-"`
+					UpdatedAt      time.Time  `json:"-"`
+					DeletedAt      *time.Time `sql:"index" json:"-"`
+					Name           string
+					Pronouns       postgres.Jsonb
+					ProfileColour  string
+					Library        pq.StringArray `gorm:"type:varchar(64)[]"`
+					ToRead         pq.StringArray `gorm:"type:varchar(64)[]"`
+					Liked          pq.StringArray `gorm:"type:varchar(64)[]"`
+					Read           pq.StringArray `gorm:"type:varchar(64)[]"`
+					Friends        pq.Int64Array  `gorm:"type:integer[]"`
+					FriendsPending pq.Int64Array  `gorm:"type:integer[]"`
+					FriendsRequest pq.Int64Array  `gorm:"type:integer[]"`
+					ReaderBlocked  pq.Int64Array  `gorm:"type:integer[]"`
+					PasswordHash   string
+					EmailHash      int64
+					Plural         bool
+					FavouriteBook  string
+					Books          []Book //Book added by reader
+					ForgotPassword ForgotPassword
+				}
+
+				type ForgotPassword struct {
+					gorm.Model
+					ReaderID  uint
+					RandomKey string
+				}
+
+				return tx.CreateTable(&ForgotPassword{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.DropTable(&ForgotPassword{}).Error
 			},
 		},
 	})
