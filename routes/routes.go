@@ -444,8 +444,23 @@ func GetFriends(w http.ResponseWriter, r *http.Request) {
 	}
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
 	if !ok {
-		http.Error(w, "not logged in", 404)
+		var pronoun models.Pronoun
+		jsonPro := []byte(friend.Pronouns.RawMessage)
+		json.Unmarshal(jsonPro, &pronoun)
+		w.WriteHeader(401)
+		res := models.ResGetFriends{
+			Name:          friend.Name,
+			ProfileColour: friend.ProfileColour,
+			Pronoun:       pronoun.Possessive,
+			Friends:       nil,
+		}
+		js, err := ffjson.Marshal(res)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.Write(js)
 		return
+
 	}
 	friends := utils.GetFriends(friend, id)
 	if friends.Name == "Same person" {
