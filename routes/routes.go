@@ -493,7 +493,7 @@ func GetReaderFriends(w http.ResponseWriter, r *http.Request) {
 	}
 	id, ok := ctx.Value(utils.ReaderKey).(uint)
 	if !ok {
-		http.Error(w, "not logged in", 404)
+		http.Error(w, "not logged in", 401)
 		return
 	}
 	maping, err := utils.GetReaderFriends(friend, id)
