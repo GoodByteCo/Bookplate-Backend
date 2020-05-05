@@ -497,3 +497,29 @@ func GetStatus(readerID uint, friendID uint) models.Status {
 		return models.Status{Status: "Add Friend"}
 	}
 }
+
+func ForgotPasswordRequest(email string) error {
+	r, err := CheckIfPresent(email)
+	if err != nil {
+		return err
+	}
+	id := r.ID
+	ulid := genULID()
+	err = addPasswordKey(id, ulid)
+	if err != nil {
+		return err
+	}
+	sendForgotPasswordEmail(email, r.Name, ulid)
+	return nil
+}
+
+func ResetPassword(readerID uint, password string) error {
+	hashedPassword, err := HashAndSalt(password)
+	if err != nil {
+		return err
+	}
+	db := bdb.Connect()
+	defer db.Close()
+	db = db.Model(&models.Reader{ID: readerID}).Update(models.Reader{PasswordHash: hashedPassword})
+	return db.Error
+}

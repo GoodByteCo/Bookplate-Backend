@@ -155,3 +155,23 @@ func CachingWare(duration time.Duration, next http.Handler) http.Handler {
 
 	})
 }
+
+func ConfirmPassKey(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		passKey := chi.URLParam(r, "passwordKey")
+		var forgotPass models.ForgotPassword
+		db := db2.Connect()
+		defer db.Close()
+		notFound := db.Where(models.ForgotPassword{RandomKey: passKey}).First(&forgotPass).RecordNotFound()
+		if notFound {
+			http.Error(w, "invalid Passkey", 401)
+			return
+		}
+		ctx := context.WithValue(r.Context(), utils.ReaderPasswordKey, uint(forgotPass.ReaderID))
+		next.ServeHTTP(w, r.WithContext(ctx))
+		fmt.Println("------")
+		fmt.Println("deleting key")
+		fmt.Println("-------")
+		db.Unscoped().Delete(&forgotPass)
+	})
+}

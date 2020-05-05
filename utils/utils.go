@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
@@ -77,10 +78,11 @@ func genArrayModifySQL(a arrayMod, changing string, toChange string, reader uint
 }
 
 const (
-	ReaderKey     key = "reader_id"
-	AuthorKey     key = "author"
-	BookKey       key = "book"
-	ReaderUserKey key = "reader"
+	ReaderKey         key = "reader_id"
+	AuthorKey         key = "author"
+	BookKey           key = "book"
+	ReaderUserKey     key = "reader"
+	ReaderPasswordKey key = "reader_password"
 )
 
 var TokenAuth *jwtauth.JWTAuth
@@ -299,20 +301,52 @@ func reverse(lst []string) chan struct {
 	return ret
 }
 
-func sendForgotPasswordEmail() {
-	from := mail.NewEmail("Example User", "test@example.com")
-	subject := "Sending with SendGrid is Fun"
-	to := mail.NewEmail("Example User", "test@example.com")
-	plainTextContent := "and easy to do anywhere, even with Go"
-	htmlContent := "<strong>and easy to do anywhere, even with Go</strong>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+func sendForgotPasswordEmail(email string, name string, ulid string) {
+	from := mail.NewEmail("Bookplate Support", "support@bookplate.co")
+	subject := "Forgot your password"
+	to := mail.NewEmail(name, email)
+	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgotpassword/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
+	log.Println(htmlContent)
+	message := mail.NewSingleEmail(from, subject, to, "", htmlContent)
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	response, err := client.Send(message)
 	if err != nil {
+		log.Println("++++++++\nEmail Error")
 		log.Println(err)
 	} else {
 		fmt.Println(response.StatusCode)
 		fmt.Println(response.Body)
 		fmt.Println(response.Headers)
 	}
+}
+
+func genULID() string {
+	entropy := ulid.Monotonic(rand.New(seededRand), 0)
+	id := ulid.MustNew(ulid.Now(), entropy)
+	return id.String()
+}
+
+func addPasswordKey(id uint, ulidKey string) error {
+	db := bdb.Connect()
+	defer db.Close()
+	var tempKey models.ForgotPassword
+	noKey := db.Where(&models.ForgotPassword{ReaderID: id}).Find(&tempKey).RecordNotFound()
+	if !noKey {
+		ulidTest := ulid.MustParse(tempKey.RandomKey)
+		timestamp := ulid.Time(ulidTest.Time())
+		timeSince := time.Since(timestamp).Hours()
+		if timeSince <= 24 {
+			passErr := berror.PasskeyExists{}
+			return passErr
+		}
+		log.Println(tempKey)
+		db.Unscoped().Delete(&tempKey)
+	}
+	passKey := models.ForgotPassword{
+		ReaderID:  id,
+		RandomKey: ulidKey,
+	}
+	db = db.Create(&passKey)
+	return db.Error
+
 }

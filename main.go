@@ -57,6 +57,14 @@ func main() {
 			})
 		})
 
+		r.Route("/forgotpassword", func(r chi.Router) {
+			r.Post("/", routes.ForgotPasswordRequest)
+			r.Route("/{passwordKey}", func(r chi.Router) {
+				r.Use(middleware.ConfirmPassKey)
+				r.Post("/", routes.ForgotPasswordReset)
+			})
+		})
+
 		r.Route("/profile", func(r chi.Router) {
 			r.Route("/{readerID}", func(r chi.Router) {
 				r.Use(middleware.ReaderWare)

@@ -2,8 +2,10 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
+	berrors "github.com/GoodByteCo/Bookplate-Backend/errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
@@ -617,6 +620,54 @@ func UnblockReader(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", http.DetectContentType([]byte("good")))
 
 	w.Write([]byte("reader Unblocked"))
+
+}
+
+func ForgotPasswordRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	type email struct {
+		email string `json:"email"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	var e email
+	err := decoder.Decode(&e)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	err = utils.ForgotPasswordRequest(e.email)
+	if err != nil {
+		if errors.Is(err, berrors.NoUserError{}) {
+			http.Error(w, err.Error(), 404)
+			return
+		} else if errors.Is(err, berrors.PasskeyExists{}) {
+			http.Error(w, err.Error(), 401)
+			return
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Write([]byte("Email sent"))
+}
+
+func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id, ok := ctx.Value(utils.ReaderPasswordKey).(uint)
+	if !ok {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+	}
+	type tempPassword struct {
+		password string `json:"password"`
+	}
+	var temp tempPassword
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&temp)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	utils.ResetPassword(id, temp.password)
 
 }
 
