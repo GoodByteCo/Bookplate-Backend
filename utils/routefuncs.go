@@ -12,6 +12,7 @@ import (
 
 	"github.com/AvraamMavridis/randomcolor"
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
+	berror "github.com/GoodByteCo/Bookplate-Backend/errors"
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jinzhu/gorm/dialects/postgres"
@@ -98,7 +99,7 @@ func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
 	if !noUser {
-		return 0, nil, UserExistError{add.Email}
+		return 0, nil, berror.UserExistError{add.Email}
 	}
 	passwordHash, err := HashAndSalt(add.Password)
 	if err != nil {

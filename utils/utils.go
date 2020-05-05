@@ -19,6 +19,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	bdb "github.com/GoodByteCo/Bookplate-Backend/db"
+	berror "github.com/GoodByteCo/Bookplate-Backend/errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/nickalie/go-mozjpegbin"
@@ -170,7 +171,7 @@ func CheckIfPresent(email string) (models.Reader, error) {
 	fmt.Println(emailHash)
 	reader, noUser := GetReaderFromDB(emailHash)
 	if noUser {
-		return models.Reader{}, NoUserError{email}
+		return models.Reader{}, berror.NoUserError{email}
 	}
 	return reader, nil
 }
