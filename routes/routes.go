@@ -626,7 +626,7 @@ func UnblockReader(w http.ResponseWriter, r *http.Request) {
 func ForgotPasswordRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	type email struct {
-		email string `json:"email"`
+		Email string `json:"email"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	var e email
@@ -635,7 +635,7 @@ func ForgotPasswordRequest(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	err = utils.ForgotPasswordRequest(e.email)
+	err = utils.ForgotPasswordRequest(e.Email)
 	if err != nil {
 		if errors.Is(err, berrors.NoUserError{}) {
 			http.Error(w, err.Error(), 404)
@@ -658,7 +658,7 @@ func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
 	type tempPassword struct {
-		password string `json:"password"`
+		Password string `json:"password"`
 	}
 	var temp tempPassword
 	decoder := json.NewDecoder(r.Body)
@@ -667,7 +667,7 @@ func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	utils.ResetPassword(id, temp.password)
+	utils.ResetPassword(id, temp.Password)
 
 }
 

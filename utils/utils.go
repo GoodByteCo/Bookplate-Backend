@@ -305,9 +305,10 @@ func sendForgotPasswordEmail(email string, name string, ulid string) {
 	from := mail.NewEmail("Bookplate Support", "support@bookplate.co")
 	subject := "Forgot your password"
 	to := mail.NewEmail(name, email)
-	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgotpassword/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
+	htmlContent := fmt.Sprintf(". To reset your password click this link <a href='https://bookplate.co/forgotpassword/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
 	log.Println(htmlContent)
-	message := mail.NewSingleEmail(from, subject, to, "", htmlContent)
+	message := mail.NewSingleEmail(from, subject, to, "A password request for this email was requested", htmlContent)
+	fmt.Println(message)
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	response, err := client.Send(message)
 	if err != nil {
