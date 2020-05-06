@@ -173,7 +173,7 @@ func CheckIfPresent(email string) (models.Reader, error) {
 	fmt.Println(emailHash)
 	reader, noUser := GetReaderFromDB(emailHash)
 	if noUser {
-		return models.Reader{}, berror.NoUserError{email}
+		return models.Reader{}, berror.NoUserError{Email: email}
 	}
 	return reader, nil
 }
