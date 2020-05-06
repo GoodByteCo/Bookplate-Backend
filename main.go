@@ -125,5 +125,11 @@ func main() {
 	})
 
 	fmt.Println("serving on port 8081")
-	_ = http.ListenAndServe(":8081", r)
+	server := &http.Server{
+		Addr:         ":8081",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		Handler:      r,
+	}
+	_ = server.ListenAndServe()
 }
