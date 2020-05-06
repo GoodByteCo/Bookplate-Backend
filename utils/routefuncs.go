@@ -481,6 +481,9 @@ func AddFriend(friendID uint, readerID uint) error {
 }
 
 func GetStatus(readerID uint, friendID uint) models.Status {
+	if readerID == friendID {
+		return models.Status{Status: "You"}
+	}
 	db := bdb.Connect()
 	defer db.Close()
 	if hasBlocked(readerID, friendID, db) {
