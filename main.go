@@ -124,9 +124,9 @@ func main() {
 		r.Post("/upload", routes.UploadBook)
 	})
 
-	fmt.Println("serving on port 8081")
+	fmt.Println("serving on port 8080")
 	server := &http.Server{
-		Addr:         ":8081",
+		Addr:         ":8080",
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		Handler:      r,
