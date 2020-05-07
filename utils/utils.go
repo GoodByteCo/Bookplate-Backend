@@ -305,8 +305,8 @@ func sendForgotPasswordEmail(email string, name string, ulid string) {
 	from := mail.NewEmail("Bookplate Support", "support@bookplate.co")
 	subject := "Forgot your password"
 	to := mail.NewEmail(name, email)
-	plainContent := fmt.Sprintf("A password request for the this email was requested. to request your password go to this link https://bookplate.co/forgotpassword/%s if you did not request this ignore this email", ulid)
-	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgotpassword/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
+	plainContent := fmt.Sprintf("A password request for the this email was requested. to request your password go to this link https://bookplate.co/forgot-password/%s if you did not request this ignore this email", ulid)
+	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgot-password/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
 	log.Println(htmlContent)
 	message := mail.NewSingleEmail(from, subject, to, plainContent, htmlContent)
 	fmt.Println(message)

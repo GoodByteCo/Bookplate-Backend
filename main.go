@@ -57,7 +57,7 @@ func main() {
 			})
 		})
 
-		r.Route("/forgotpassword", func(r chi.Router) {
+		r.Route("/forgot-password", func(r chi.Router) {
 			r.Post("/", routes.ForgotPasswordRequest)
 			r.Route("/{passwordKey}", func(r chi.Router) {
 				r.Use(middleware.ConfirmPassKey)
