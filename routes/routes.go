@@ -665,11 +665,13 @@ func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&temp)
 	if err != nil {
 		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = utils.ResetPassword(id, temp.Password)
 	if err != nil {
 		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
