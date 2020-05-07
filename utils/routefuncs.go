@@ -210,15 +210,16 @@ func GetProfile(reader models.Reader) models.ReqProfile {
 	}
 }
 
-func GetLiked(reader models.Reader) models.ReqProfileList {
+func GetBookList(reader models.Reader, length int, itemGetter func(int) string) models.ReqProfileList {
 	db := bdb.Connect()
 	defer db.Close()
 	var booklist []models.BookForProfile
-	for i := range reverse(reader.Liked) {
+	for i := length - 1; i >= 0; i-- {
+		str := itemGetter(i)
 		var book models.Book
-		db.Where(models.Book{BookID: i.string}).Find(&book)
+		db.Where(models.Book{BookID: str}).Find(&book)
 		forProfile := models.BookForProfile{
-			BookID:   i.string,
+			BookID:   str,
 			Title:    book.Title,
 			CoverURL: book.CoverURL,
 		}
@@ -232,71 +233,93 @@ func GetLiked(reader models.Reader) models.ReqProfileList {
 
 }
 
-func GetRead(reader models.Reader) models.ReqProfileList {
-	db := bdb.Connect()
-	defer db.Close()
-	var booklist []models.BookForProfile
-	for i := range reverse(reader.Read) {
-		var book models.Book
-		db.Where(models.Book{BookID: i.string}).Find(&book)
-		forProfile := models.BookForProfile{
-			BookID:   i.string,
-			Title:    book.Title,
-			CoverURL: book.CoverURL,
-		}
-		booklist = append(booklist, forProfile)
-	}
-	return models.ReqProfileList{
-		Name:          reader.Name,
-		ProfileColour: reader.ProfileColour,
-		BookList:      booklist,
-	}
+// func GetLiked(reader models.Reader) models.ReqProfileList {
+// 	db := bdb.Connect()
+// 	defer db.Close()
+// 	var booklist []models.BookForProfile
+// 	for i := range reverse(reader.Liked) {
+// 		var book models.Book
+// 		db.Where(models.Book{BookID: i.string}).Find(&book)
+// 		forProfile := models.BookForProfile{
+// 			BookID:   i.string,
+// 			Title:    book.Title,
+// 			CoverURL: book.CoverURL,
+// 		}
+// 		booklist = append(booklist, forProfile)
+// 	}
+// 	return models.ReqProfileList{
+// 		Name:          reader.Name,
+// 		ProfileColour: reader.ProfileColour,
+// 		BookList:      booklist,
+// 	}
 
-}
+// }
 
-func GetToRead(reader models.Reader) models.ReqProfileList {
-	db := bdb.Connect()
-	defer db.Close()
-	var booklist []models.BookForProfile
-	for i := range reverse(reader.ToRead) {
-		var book models.Book
-		db.Where(models.Book{BookID: i.string}).Find(&book)
-		forProfile := models.BookForProfile{
-			BookID:   i.string,
-			Title:    book.Title,
-			CoverURL: book.CoverURL,
-		}
-		booklist = append(booklist, forProfile)
-	}
-	return models.ReqProfileList{
-		Name:          reader.Name,
-		ProfileColour: reader.ProfileColour,
-		BookList:      booklist,
-	}
+// func GetRead(reader models.Reader) models.ReqProfileList {
+// 	db := bdb.Connect()
+// 	defer db.Close()
+// 	var booklist []models.BookForProfile
+// 	for i := range reverse(reader.Read) {
+// 		var book models.Book
+// 		db.Where(models.Book{BookID: i.string}).Find(&book)
+// 		forProfile := models.BookForProfile{
+// 			BookID:   i.string,
+// 			Title:    book.Title,
+// 			CoverURL: book.CoverURL,
+// 		}
+// 		booklist = append(booklist, forProfile)
+// 	}
+// 	return models.ReqProfileList{
+// 		Name:          reader.Name,
+// 		ProfileColour: reader.ProfileColour,
+// 		BookList:      booklist,
+// 	}
 
-}
+// }
 
-func GetLibrary(reader models.Reader) models.ReqProfileList {
-	db := bdb.Connect()
-	defer db.Close()
-	var booklist []models.BookForProfile
-	for i := range reverse(reader.Library) {
-		var book models.Book
-		db.Where(models.Book{BookID: i.string}).Find(&book)
-		forProfile := models.BookForProfile{
-			BookID:   i.string,
-			Title:    book.Title,
-			CoverURL: book.CoverURL,
-		}
-		booklist = append(booklist, forProfile)
-	}
-	return models.ReqProfileList{
-		Name:          reader.Name,
-		ProfileColour: reader.ProfileColour,
-		BookList:      booklist,
-	}
+// func GetToRead(reader models.Reader) models.ReqProfileList {
+// 	db := bdb.Connect()
+// 	defer db.Close()
+// 	var booklist []models.BookForProfile
+// 	for i := range reverse(reader.ToRead) {
+// 		var book models.Book
+// 		db.Where(models.Book{BookID: i.string}).Find(&book)
+// 		forProfile := models.BookForProfile{
+// 			BookID:   i.string,
+// 			Title:    book.Title,
+// 			CoverURL: book.CoverURL,
+// 		}
+// 		booklist = append(booklist, forProfile)
+// 	}
+// 	return models.ReqProfileList{
+// 		Name:          reader.Name,
+// 		ProfileColour: reader.ProfileColour,
+// 		BookList:      booklist,
+// 	}
 
-}
+// }
+
+// func GetLibrary(reader models.Reader) models.ReqProfileList {
+// 	db := bdb.Connect()
+// 	defer db.Close()
+// 	var booklist []models.BookForProfile
+// 	for i := range reverse(reader.Library) {
+// 		var book models.Book
+// 		db.Where(models.Book{BookID: i.string}).Find(&book)
+// 		forProfile := models.BookForProfile{
+// 			BookID:   i.string,
+// 			Title:    book.Title,
+// 			CoverURL: book.CoverURL,
+// 		}
+// 		booklist = append(booklist, forProfile)
+// 	}
+// 	return models.ReqProfileList{
+// 		Name:          reader.Name,
+// 		ProfileColour: reader.ProfileColour,
+// 		BookList:      booklist,
+// 	}
+
+// }
 
 func RemoveFriends(friendID uint, readerID uint) error {
 	friend := strconv.FormatUint(uint64(friendID), 10)
