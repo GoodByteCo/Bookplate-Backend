@@ -99,7 +99,7 @@ func AddReader(add models.ReqReader) (uint uint, error, usererror error) {
 	emailHash := HashEmail(add.Email)
 	_, noUser := GetReaderFromDB(emailHash)
 	if !noUser {
-		return 0, nil, berror.UserExistError{add.Email}
+		return 0, nil, berror.UserExistError{Email: add.Email}
 	}
 	passwordHash, err := HashAndSalt(add.Password)
 	if err != nil {
@@ -481,6 +481,9 @@ func AddFriend(friendID uint, readerID uint) error {
 }
 
 func GetStatus(readerID uint, friendID uint) models.Status {
+	if readerID == friendID {
+		return models.Status{Status: "You"}
+	}
 	db := bdb.Connect()
 	defer db.Close()
 	if hasBlocked(readerID, friendID, db) {
