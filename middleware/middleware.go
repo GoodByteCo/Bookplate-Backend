@@ -12,6 +12,7 @@ import (
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
+	"github.com/oklog/ulid"
 
 	"github.com/GoodByteCo/Bookplate-Backend/models"
 	"github.com/go-chi/chi"
@@ -165,6 +166,13 @@ func ConfirmPassKey(next http.Handler) http.Handler {
 		notFound := db.Where(models.ForgotPassword{RandomKey: passKey}).First(&forgotPass).RecordNotFound()
 		if notFound {
 			http.Error(w, "invalid Passkey", 401)
+			return
+		}
+		ulidTest := ulid.MustParse(forgotPass.RandomKey)
+		timestamp := ulid.Time(ulidTest.Time())
+		timeSince := time.Since(timestamp).Hours()
+		if timeSince > 24 {
+			http.Error(w, "expired passkey", 401)
 			return
 		}
 		ctx := context.WithValue(r.Context(), utils.ReaderPasswordKey, uint(forgotPass.ReaderID))
