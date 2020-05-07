@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image/jpeg"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -258,8 +260,28 @@ func isRequested(readerID uint, friendID uint, db *gorm.DB) bool { //5
 	return false
 }
 
-func binarySearch(searchWord string, list []string) bool {
+func sendForgotPasswordEmail(email string, name string, ulid string) {
+	from := mail.NewEmail("Bookplate Support", "support@bookplate.co")
+	subject := "Forgot your password"
+	to := mail.NewEmail(name, email)
+	plainContent := fmt.Sprintf("A password request for the this email was requested. to request your password go to this link https://bookplate.co/forgot-password/%s if you did not request this ignore this email", ulid)
+	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgot-password/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
+	log.Println(htmlContent)
+	message := mail.NewSingleEmail(from, subject, to, plainContent, htmlContent)
+	fmt.Println(message)
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	response, err := client.Send(message)
+	if err != nil {
+		log.Println("++++++++\nEmail Error")
+		log.Println(err)
+	} else {
+		fmt.Println(response.StatusCode)
+		fmt.Println(response.Body)
+		fmt.Println(response.Headers)
+	}
+}
 
+func binarySearch(searchWord string, list []string) bool {
 	low := 0
 	high := len(list) - 1
 
@@ -272,12 +294,15 @@ func binarySearch(searchWord string, list []string) bool {
 			high = median - 1
 		}
 	}
-
 	if low == len(list) || list[low] != searchWord {
 		return false
 	}
-
 	return true
+}
+
+func contains(list []string, searchWord string) bool {
+	sort.Strings(list)
+	return binarySearch(searchWord, list)
 }
 
 func reverse(lst []string) chan struct {
@@ -299,27 +324,6 @@ func reverse(lst []string) chan struct {
 		close(ret)
 	}()
 	return ret
-}
-
-func sendForgotPasswordEmail(email string, name string, ulid string) {
-	from := mail.NewEmail("Bookplate Support", "support@bookplate.co")
-	subject := "Forgot your password"
-	to := mail.NewEmail(name, email)
-	plainContent := fmt.Sprintf("A password request for the this email was requested. to request your password go to this link https://bookplate.co/forgot-password/%s if you did not request this ignore this email", ulid)
-	htmlContent := fmt.Sprintf("A password request for this email was requested. To reset your password click this link <a href='https://bookplate.co/forgot-password/%s'>here</a><br/> if you did not request a password reset ignore this email", ulid)
-	log.Println(htmlContent)
-	message := mail.NewSingleEmail(from, subject, to, plainContent, htmlContent)
-	fmt.Println(message)
-	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	response, err := client.Send(message)
-	if err != nil {
-		log.Println("++++++++\nEmail Error")
-		log.Println(err)
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-	}
 }
 
 func genULID() string {
@@ -351,4 +355,11 @@ func addPasswordKey(id uint, ulidKey string) error {
 	db = db.Create(&passKey)
 	return db.Error
 
+}
+
+func getPronouns(raw json.RawMessage) models.Pronoun {
+	var pronoun models.Pronoun
+	jsonPro := []byte(raw)
+	json.Unmarshal(jsonPro, &pronoun)
+	return pronoun
 }

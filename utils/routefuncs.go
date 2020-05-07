@@ -1,11 +1,9 @@
 package utils
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -150,15 +148,11 @@ func GetReaderBook(id uint, book_id string) models.ReqInList {
 	defer db.Close()
 	var reader models.Reader
 	db.Where(&models.Reader{ID: id}).First(&reader)
-	sort.Strings(reader.Library)
-	sort.Strings(reader.Read)
-	sort.Strings(reader.ToRead)
-	sort.Strings(reader.Liked)
 	inList := models.InternalInList{
-		Read:    binarySearch(book_id, reader.Read),
-		Liked:   binarySearch(book_id, reader.Liked),
-		ToRead:  binarySearch(book_id, reader.ToRead),
-		Library: binarySearch(book_id, reader.Library),
+		Read:    contains(reader.Read, book_id),
+		Liked:   contains(reader.Liked, book_id),
+		ToRead:  contains(reader.ToRead, book_id),
+		Library: contains(reader.Library, book_id),
 	}
 	var in models.Friends
 	db.Raw("select readers.ID, readers.name, readers.profile_colour from readers inner join (select friends from readers where ID = $1) vtable on readers.id = ANY (vtable.friends) WHERE readers.library @> ARRAY[$2]::VARCHAR[]", id, book_id).Scan(&in)
@@ -198,9 +192,7 @@ func GetProfile(reader models.Reader) models.ReqProfile {
 		BookID: favBook.BookID,
 		Title:  favBook.Title,
 	}
-	var pronoun models.Pronoun
-	jsonPro := []byte(reader.Pronouns.RawMessage)
-	json.Unmarshal(jsonPro, &pronoun)
+	pronoun := getPronouns(reader.Pronouns.RawMessage)
 	return models.ReqProfile{
 		Name:          reader.Name,
 		ProfileColour: reader.ProfileColour,
@@ -281,9 +273,7 @@ func GetFriends(friend models.Reader, readerID uint) models.ResGetFriends {
 			Name: "Same person", // is a hack
 		}
 	}
-	var pronoun models.Pronoun
-	jsonPro := []byte(friend.Pronouns.RawMessage)
-	json.Unmarshal(jsonPro, &pronoun)
+	pronoun := getPronouns(friend.Pronouns.RawMessage)
 	db := bdb.Connect()
 	if !isMutualFriend(readerID, friend.ID, db) {
 		return models.ResGetFriends{
