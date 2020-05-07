@@ -637,10 +637,10 @@ func ForgotPasswordRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	err = utils.ForgotPasswordRequest(e.Email)
 	if err != nil {
-		if errors.Is(err, berrors.NoUserError{}) {
+		if errors.As(err, &berrors.NoUserError{}) {
 			http.Error(w, err.Error(), 404)
 			return
-		} else if errors.Is(err, berrors.PasskeyExists{}) {
+		} else if errors.As(err, &berrors.PasskeyExists{}) {
 			http.Error(w, err.Error(), 401)
 			return
 		} else {
