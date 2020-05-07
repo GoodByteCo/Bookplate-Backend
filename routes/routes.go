@@ -667,7 +667,13 @@ func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	utils.ResetPassword(id, temp.Password)
+	err = utils.ResetPassword(id, temp.Password)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Write([]byte("Password Changed"))
 
 }
 
