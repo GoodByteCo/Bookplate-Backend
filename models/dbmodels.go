@@ -23,6 +23,7 @@ type Book struct {
 	CoverURL    string
 	BookColor   string
 	ReaderID    uint
+	PageCount   uint
 	CreatedAt   time.Time  `json:"-"`
 	UpdatedAt   time.Time  `json:"-"`
 	DeletedAt   *time.Time `sql:"index" json:"-"`
@@ -374,6 +375,32 @@ func Start(db *gorm.DB) error {
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return tx.DropTable(&ForgotPassword{}).Error
+			},
+		},
+		{
+			ID: "Add Page Count",
+			Migrate: func(tx *gorm.DB) error {
+				type Book struct {
+					ID          uint   `gorm:"primary_key" json:"-"`
+					BookID      string `gorm:"unique"`
+					Title       string `json:"title"`
+					Year        int    `json:"year"`
+					Description string `gorm:"type:text"`
+					CoverURL    string
+					BookColor   string
+					ReaderID    uint
+					PageCount   uint
+					CreatedAt   time.Time  `json:"-"`
+					UpdatedAt   time.Time  `json:"-"`
+					DeletedAt   *time.Time `sql:"index" json:"-"`
+					Authors     []Author   `gorm:"many2many:book_authors;"`
+					BooknameCol string     `type:"tsvector"`
+				}
+
+				return tx.AutoMigrate(&Book{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Model(&Book{}).DropColumn("page_count").Error
 			},
 		},
 	})
