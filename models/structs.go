@@ -80,6 +80,7 @@ type ResWebBook struct {
 	Description string            `json:"description"`
 	CoverUrl    string            `json:"cover_url"`
 	BookColor   string            `json:"book_color"`
+	PageCount   uint              `json:"page_count"`
 }
 
 //Book data for author request
@@ -198,6 +199,7 @@ func (b Book) ToResWebBook(author Authors) ResWebBook {
 		Description: b.Description,
 		CoverUrl:    b.CoverURL,
 		BookColor:   b.BookColor,
+		PageCount:   b.PageCount,
 	}
 }
 
