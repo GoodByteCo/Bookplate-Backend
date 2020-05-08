@@ -24,8 +24,8 @@ import (
 	"gopkg.in/kothar/go-backblaze.v0"
 )
 
-var replace = "https://photos.bookplate.co"
-var start = "https://f001.backblazeb2.com"
+const replace = "https://photos.bookplate.co"
+const start = "https://f001.backblazeb2.com"
 
 func Ping(w http.ResponseWriter, r *http.Request) {
 	body := "Pong"
@@ -86,7 +86,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server Error", http.StatusInternalServerError)
 		return
 	}
-	js, _ := json.Marshal(bID)
+	js, _ := ffjson.Marshal(bID)
 	w.Header().Set("Content-Type", http.DetectContentType(js))
 	w.Write(js)
 }
@@ -116,11 +116,6 @@ func AddReader(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(tokenString)
-	http.SetCookie(w, &http.Cookie{
-		Name:    "user_id",
-		Value:   strconv.Itoa(int(id)),
-		Expires: expiry,
-	})
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
 		Value:    tokenString,

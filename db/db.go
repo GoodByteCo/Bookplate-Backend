@@ -1,8 +1,6 @@
 package db
 
 import (
-	"fmt"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -10,7 +8,6 @@ func Connect() *gorm.DB {
 	db, err := gorm.Open("postgres", "host=localhost port=5432 user=quinnpollock dbname=BookPlateGo password=bookplate sslmode=disable")
 	if err != nil {
 		panic("DB Down")
-		fmt.Println(err)
 	}
 	return db
 }

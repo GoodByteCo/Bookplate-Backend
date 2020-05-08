@@ -76,12 +76,10 @@ func ReaderWare(next http.Handler) http.Handler {
 func LoginWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, claims, err := jwtauth.FromContext(r.Context())
-
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
-
 		err = claims.Valid()
 		if err != nil {
 			next.ServeHTTP(w, r)
@@ -94,24 +92,19 @@ func LoginWare(next http.Handler) http.Handler {
 			fmt.Print("json: expiry")
 			fmt.Println(exp)
 		}
-
 		issb := token.Claims.(jwt.MapClaims).VerifyIssuer(utils.Issuer, false)
 		if !issb {
 			next.ServeHTTP(w, r)
 			return
 		}
-
 		if token == nil || !token.Valid {
 			next.ServeHTTP(w, r)
 			return
 		}
-
-		fmt.Println(claims["reader_id"])
 		tID := claims["reader_id"]
 		tempReaderID := tID.(float64)
 		readerID := uint(tempReaderID)
 		ctx := context.WithValue(r.Context(), utils.ReaderKey, readerID)
-		//get claims
 		// Token is authenticated, pass it through
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -153,7 +146,6 @@ func CheckBook(next http.Handler) http.Handler {
 
 func CachingWare(duration time.Duration, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 	})
 }
 
