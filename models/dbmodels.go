@@ -15,20 +15,21 @@ import (
 
 //Book type for database
 type Book struct {
-	ID          uint   `gorm:"primary_key" json:"-"`
-	BookID      string `gorm:"unique"`
-	Title       string `json:"title"`
-	Year        int    `json:"year"`
-	Description string `gorm:"type:text"`
-	CoverURL    string
-	BookColor   string
-	ReaderID    uint
-	PageCount   uint
-	CreatedAt   time.Time  `json:"-"`
-	UpdatedAt   time.Time  `json:"-"`
-	DeletedAt   *time.Time `sql:"index" json:"-"`
-	Authors     []Author   `gorm:"many2many:book_authors;"`
-	BooknameCol string     `type:"tsvector"`
+	ID              uint   `gorm:"primary_key" json:"-"`
+	BookID          string `gorm:"unique"`
+	Title           string `json:"title"`
+	Year            int    `json:"year"`
+	Description     string `gorm:"type:text"`
+	CoverURL        string
+	BookColor       string
+	ReaderID        uint
+	PageCount       uint
+	CreatedAt       time.Time  `json:"-"`
+	UpdatedAt       time.Time  `json:"-"`
+	DeletedAt       *time.Time `sql:"index" json:"-"`
+	Authors         []Author   `gorm:"many2many:book_authors;"`
+	BooknameCol     string     `type:"tsvector"`
+	BooknameColStop string     `type:"tsvector"`
 }
 
 //ToUrlSafe Remove non url safe characters from book title and set it as Id
@@ -401,6 +402,36 @@ func Start(db *gorm.DB) error {
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return tx.Model(&Book{}).DropColumn("page_count").Error
+			},
+		},
+		{
+			ID: "Add No Stop",
+			Migrate: func(tx *gorm.DB) error {
+				type Book struct {
+					ID              uint   `gorm:"primary_key" json:"-"`
+					BookID          string `gorm:"unique"`
+					Title           string `json:"title"`
+					Year            int    `json:"year"`
+					Description     string `gorm:"type:text"`
+					CoverURL        string
+					BookColor       string
+					ReaderID        uint
+					PageCount       uint
+					CreatedAt       time.Time  `json:"-"`
+					UpdatedAt       time.Time  `json:"-"`
+					DeletedAt       *time.Time `sql:"index" json:"-"`
+					Authors         []Author   `gorm:"many2many:book_authors;"`
+					BooknameCol     string     `type:"tsvector"`
+					BooknameColStop string     `type:"tsvector"`
+				}
+
+				tx = tx.Exec("ALTER TABLE books ADD COLUMN bookname_col_stop tsvector GENERATED ALWAYS AS (to_tsvector('english_nostop', coalesce(title, ''))) STORED;")
+				tx = tx.Exec("CREATE INDEX bookname_stop_idx ON readers USING GIN (bookname_col_stop)")
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				tx = tx.Model(&Book{}).RemoveIndex("bookname_stop_idx")
+				return tx.DropColumn("bookname_col_stop").Error
 			},
 		},
 	})
