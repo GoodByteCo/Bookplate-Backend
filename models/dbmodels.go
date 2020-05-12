@@ -426,7 +426,7 @@ func Start(db *gorm.DB) error {
 				}
 
 				tx = tx.Exec("ALTER TABLE books ADD COLUMN bookname_col_stop tsvector GENERATED ALWAYS AS (to_tsvector('english_nostop', coalesce(title, ''))) STORED;")
-				tx = tx.Exec("CREATE INDEX bookname_stop_idx ON readers USING GIN (bookname_col_stop)")
+				tx = tx.Exec("CREATE INDEX bookname_stop_idx ON books USING GIN (bookname_col_stop)")
 				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {
