@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/GoodByteCo/Bookplate-Backend/utils"
@@ -16,6 +19,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/go-chi/jwtauth"
+	"github.com/go-chi/valve"
 )
 
 func init() {
@@ -23,6 +27,8 @@ func init() {
 }
 
 func main() {
+	valv := valve.New()
+	baseCtx := valv.Context()
 	r := chi.NewRouter()
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -40,7 +46,7 @@ func main() {
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.Compress(5))
-	r.Use(chimiddleware.Timeout(60 * time.Second))
+	// r.Use(chimiddleware.Timeout(60 * time.Second))
 	r.Use(jwtauth.Verifier(utils.TokenAuth))
 	r.Use(middleware.LoginWare)
 	r.Route("/", func(r chi.Router) {
@@ -125,11 +131,37 @@ func main() {
 	})
 
 	fmt.Println("serving on port 8080")
-	server := &http.Server{
+	srv := &http.Server{
 		Addr:         ":8080",
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
-		Handler:      r,
+		Handler:      chi.ServerBaseContext(baseCtx, r),
 	}
-	_ = server.ListenAndServe()
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt)
+	go func() {
+		for range ch {
+			// sig is a ^C, handle it
+			fmt.Println("shutting down..")
+
+			// first valv
+			valv.Shutdown(20 * time.Second)
+
+			// create context with timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+			defer cancel()
+
+			// start http shutdown
+			srv.Shutdown(ctx)
+
+			// verify, in worst case call cancel via defer
+			select {
+			case <-time.After(21 * time.Second):
+				fmt.Println("not all connections done")
+			case <-ctx.Done():
+
+			}
+		}
+	}()
+	srv.ListenAndServe()
 }
