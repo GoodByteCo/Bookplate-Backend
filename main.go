@@ -63,6 +63,11 @@ func main() {
 			})
 		})
 
+		r.Route("/search", func(r chi.Router) {
+			r.Get("/books/{term}", func(w http.ResponseWriter, r *http.Request) { fmt.Println(r.URL.Query()["page"]) })
+			r.Get("/authors/{term}", func(w http.ResponseWriter, r *http.Request) { fmt.Println(r.URL.Query()["page"]) })
+		})
+
 		r.Route("/forgot-password", func(r chi.Router) {
 			r.Post("/", routes.ForgotPasswordRequest)
 			r.Route("/{passwordKey}", func(r chi.Router) {
