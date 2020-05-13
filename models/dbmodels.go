@@ -434,6 +434,16 @@ func Start(db *gorm.DB) error {
 				return tx.DropColumn("bookname_col_stop").Error
 			},
 		},
+		{
+			ID: "create tgrm index",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.Exec("CREATE INDEX trgm_idx_books_title ON bookss USING gin (title gin_trgm_ops);").Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				tx = tx.Model(&Book{}).RemoveIndex("trgm_idx_books_title")
+				return tx.Error
+			},
+		},
 	})
 	return m.Migrate()
 }
