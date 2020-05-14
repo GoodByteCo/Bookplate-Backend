@@ -684,7 +684,7 @@ func SearchBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	term := chi.URLParam(r, "term")
 
-	results := utils.SearchPage("SELECT title, \"public\".word_similary(books.title, '$1') AS trgm_rank FROM books WHERE title % '$1' ORDER BY trgm_rank DESC", term, uint(page))
+	results := utils.SearchPage("SELECT title, .word_similarity(books.title, '$1') AS trgm_rank FROM books WHERE title % '$1' ORDER BY trgm_rank DESC", term, uint(page))
 	js, err := ffjson.Marshal(results)
 	if err != nil {
 		log.Println("somthing went wrong")
@@ -705,7 +705,7 @@ func SearchAuthors(w http.ResponseWriter, r *http.Request) {
 	}
 	term := chi.URLParam(r, "term")
 
-	results := utils.SearchPage("SELECT title, word_similary(books.title, '$1') AS trgm_rank FROM books WHERE title % '$1' ORDER BY trgm_rank DESC", term, uint(page))
+	results := utils.SearchPage("SELECT title, word_similarity(books.title, '$1') AS trgm_rank FROM books WHERE title % '$1' ORDER BY trgm_rank DESC", term, uint(page))
 	js, err := ffjson.Marshal(results)
 	if err != nil {
 		log.Println("somthing went wrong")
