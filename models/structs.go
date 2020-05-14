@@ -144,14 +144,15 @@ type ReqProfileList struct {
 
 type ReqAuthorSearchResult struct {
 	Name     string  `json:"name"`
-	AuthorId string  `json:"author_id"`
+	AuthorID string  `json:"author_id"`
 	Rank     float64 `json:"-" gorm:"column:trgm_rank"`
 }
 
 type ReqBookSearchResult struct {
-	Title    string `json:"title`
-	BookID   string `json:"book_id"`
-	CoverURL string `json:"cover_url`
+	Title    string  `json:"title"`
+	BookID   string  `json:"book_id"`
+	CoverURL string  `json:"cover_url"`
+	Rank     float64 `json:"-" gorm:"column:trgm_rank"`
 }
 
 type BookForProfile struct {
