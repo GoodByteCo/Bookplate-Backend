@@ -143,8 +143,8 @@ type ReqProfileList struct {
 }
 
 type ReqSearchResult struct {
-	Results string `json:"result"`
-	Rank    int    `json:"-"`
+	Results string `json:"result" gorm:"result"`
+	Rank    int    `json:"-" gorm:"trgm_rank"`
 }
 
 type BookForProfile struct {
