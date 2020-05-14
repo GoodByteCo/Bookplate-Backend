@@ -225,7 +225,7 @@ func GetBookList(reader models.Reader, length int, itemGetter func(int) string) 
 
 }
 func SearchAuthors(term string, page uint) []models.ReqAuthorSearchResult {
-	query := paginatedQuery("SELECT name, word_similarity(authors.name, $1) AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC").addOffset(page)
+	query := paginatedQuery("SELECT name, similarity(authors.name, $1) AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
 	results := make([]models.ReqAuthorSearchResult, 0, 10)
@@ -237,7 +237,7 @@ func SearchAuthors(term string, page uint) []models.ReqAuthorSearchResult {
 }
 
 func SearchBooks(term string, page uint) []models.ReqBookSearchResult {
-	query := paginatedQuery("SELECT title, book_id, cover_url, word_similarity(books.title, $1) AS trgm_rank FROM books WHERE title % $1 ORDER BY trgm_rank DESC").addOffset(page)
+	query := paginatedQuery("SELECT title, book_id, cover_url, similarity(books.title, $1) AS trgm_rank FROM books WHERE title % $1 ORDER BY trgm_rank DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
 	results := make([]models.ReqBookSearchResult, 0, 10)
