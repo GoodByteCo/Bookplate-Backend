@@ -64,8 +64,8 @@ func main() {
 		})
 
 		r.Route("/search", func(r chi.Router) {
-			r.Get("/books/{term}", func(w http.ResponseWriter, r *http.Request) { fmt.Println(r.URL.Query()["page"]) })
-			r.Get("/authors/{term}", func(w http.ResponseWriter, r *http.Request) { fmt.Println(r.URL.Query()["page"]) })
+			r.Get("/books/{term}", routes.SearchBooks)
+			r.Get("/authors/{term}", routes.SearchAuthors)
 		})
 
 		r.Route("/forgot-password", func(r chi.Router) {

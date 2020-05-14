@@ -142,6 +142,11 @@ type ReqProfileList struct {
 	BookList      []BookForProfile `json:"book_list"`
 }
 
+type ReqSearchResult struct {
+	Results string `json:"result"`
+	Rank    int    `json:"-"`
+}
+
 type BookForProfile struct {
 	BookID   string `json:"book_id"`
 	Title    string `json:"title"`

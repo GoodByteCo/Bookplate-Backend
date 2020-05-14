@@ -672,6 +672,69 @@ func ForgotPasswordReset(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func SearchBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	pageL := r.URL.Query()["page"]
+	var page int
+	if len(pageL) == 0 {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(pageL[0])
+	}
+	term := chi.URLParam(r, "term")
+
+	results := utils.SearchPage("SELECT title, word_similary(books.title, $1) AS trgm_rank FROM books WHERE title % $1 ORDER BY trgm_rank DESC", term, uint(page))
+	js, err := ffjson.Marshal(results)
+	if err != nil {
+		log.Println("somthing went wrong")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(js)
+}
+
+func SearchAuthors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	pageL := r.URL.Query()["page"]
+	var page int
+	if len(pageL) == 0 {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(pageL[0])
+	}
+	term := chi.URLParam(r, "term")
+
+	results := utils.SearchPage("SELECT title, word_similary(books.title, $1) AS trgm_rank FROM books WHERE title % $1 ORDER BY trgm_rank DESC", term, uint(page))
+	js, err := ffjson.Marshal(results)
+	if err != nil {
+		log.Println("somthing went wrong")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(js)
+}
+
+func SearchAuthor(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Charset", "utf-8")
+	w.Header().Set("Content-Type", "application/json")
+	pageL := r.URL.Query()["page"]
+	var page int
+	if len(pageL) == 0 {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(pageL[0])
+	}
+	term := chi.URLParam(r, "term")
+
+	results := utils.SearchPage("SELECT name,word_similarity(authors.name, $1)AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC ", term, uint(page))
+	js, err := ffjson.Marshal(results)
+	if err != nil {
+		log.Println("somthing went wrong")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(js)
+}
+
 func getBucket() *backblaze.Bucket {
 	b2, err := backblaze.NewB2(backblaze.Credentials{
 		AccountID:      os.Getenv("B2_ACCOUNT_ID"),

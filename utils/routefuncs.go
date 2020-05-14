@@ -224,6 +224,15 @@ func GetBookList(reader models.Reader, length int, itemGetter func(int) string) 
 	}
 
 }
+func SearchPage(queryRaw, term string, page uint) []models.ReqSearchResult {
+	query := paginatedQuery(queryRaw).addOffset(page)
+	db := bdb.Connect()
+	defer db.Close()
+	results := make([]models.ReqSearchResult, 0, 10)
+	db.Raw(query, term).Scan(&results)
+	log.Println(results)
+	return results
+}
 
 func RemoveFriends(friendID uint, readerID uint) error {
 	friend := strconv.FormatUint(uint64(friendID), 10)
