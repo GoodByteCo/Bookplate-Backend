@@ -229,6 +229,7 @@ func SearchPage(queryRaw, term string, page uint) []models.ReqSearchResult {
 	db := bdb.Connect()
 	defer db.Close()
 	results := make([]models.ReqSearchResult, 0, 10)
+	fmt.Println(query)
 	db.Raw(query, term).Scan(&results)
 	log.Println(results)
 	return results
