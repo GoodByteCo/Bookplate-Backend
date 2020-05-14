@@ -43,7 +43,7 @@ type arrayMod int
 type paginatedQuery string
 
 func (q paginatedQuery) addOffset(pageNum uint) string {
-	offset := pageNum * 10
+	offset := (pageNum - 1) * 10
 	return fmt.Sprintf("%s LIMIT 10 OFFSET %v", string(q), offset)
 }
 
