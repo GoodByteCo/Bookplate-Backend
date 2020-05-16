@@ -241,7 +241,7 @@ func SearchBooks(spaces, bars string, page uint) []models.ResBookSearchResult {
 		BookID    string
 		FinalRank float64
 	}
-	query := paginatedQuery("SELECT book_id,((rank2*10::real)+(rank*5::real)+trgm_rank)as final_rank FROM books,to_tsquery('english_nostop',$1)AS query,phraseto_tsquery('english_nostop',$2)as query2,ts_rank_cd(bookname_col_stop,query)AS rank,ts_rank_cd(bookname_col_stop,query2,1)AS rank2,word_similarity(books.title,$2)AS trgm_rank WHERE((rank2*10::real)+(rank*5::real)+trgm_rank)>0.1 ORDER BY((rank2*10::real)+(rank*5::real)+trgm_rank)DESC").addOffset(page)
+	query := paginatedQuery("SELECT book_id,((rank2*10::real)+(rank*5::real)+trgm_rank)as final_rank FROM books,to_tsquery('english_nostop',$1)AS query,phraseto_tsquery('english_nostop',$2)as query2,ts_rank_cd(bookname_col_stop,query)AS rank,ts_rank_cd(bookname_col_stop,query2,1)AS rank2,word_similarity(books.title,$2)AS trgm_rank WHERE((rank2*10::real)+(rank*5::real)+trgm_rank)>0.15 ORDER BY((rank2*10::real)+(rank*5::real)+trgm_rank)DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
 	itermResults := make([]bookReturn, 0, 5)
