@@ -246,9 +246,8 @@ func SearchBooks(spaces, bars string, page uint) []models.ResBookSearchResult {
 	defer db.Close()
 	itermResults := make([]bookReturn, 0, 5)
 	results := make([]models.ResBookSearchResult, 0, 10)
-	fmt.Println(query)
-	fmt.Println(spaces)
 	db.Raw(query, bars, spaces).Find(&itermResults)
+	fmt.Println(itermResults)
 	var b models.Book
 	for _, item := range itermResults {
 		db.Where(models.Book{BookID: item.BookID}).Preload("Authors").First(&b)
