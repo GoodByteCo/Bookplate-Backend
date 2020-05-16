@@ -684,7 +684,11 @@ func SearchBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	term := chi.URLParam(r, "term")
 
-	results := utils.SearchBooks(term, uint(page))
+	spaces, bars, err := utils.ToQuery(term)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	results := utils.SearchBooks(spaces, bars, uint(page))
 	js, err := ffjson.Marshal(results)
 	if err != nil {
 		log.Println("somthing went wrong")

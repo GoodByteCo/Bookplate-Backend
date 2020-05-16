@@ -42,7 +42,7 @@ type arrayMod int
 
 type paginatedQuery string
 
-func ToQuery(term string) (string, string, error) {
+func ToQuery(term string) (spaces string, bars string, err error) {
 	if strings.ContainsRune(term, '_') {
 		withSpaces := strings.ReplaceAll(term, "_", " ")
 		withBars := strings.ReplaceAll(term, "_", "|")
