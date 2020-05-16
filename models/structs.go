@@ -221,7 +221,7 @@ func (w ReqWebBook) ToJson() []byte {
 
 func (a Author) ToBookAuthor() ResAuthorForBook {
 	return ResAuthorForBook{
-		AuthorId: a.AuthorId,
+		AuthorID: a.AuthorId,
 		Name:     a.Name,
 	}
 
