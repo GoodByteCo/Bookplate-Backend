@@ -66,6 +66,7 @@ func main() {
 		r.Route("/search", func(r chi.Router) {
 			r.Get("/books/{term}", routes.SearchBooks)
 			r.Get("/authors/{term}", routes.SearchAuthors)
+			r.Get("/authors/test/{term}", routes.SearchAuthorForBook)
 		})
 
 		r.Route("/forgot-password", func(r chi.Router) {

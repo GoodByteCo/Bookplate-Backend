@@ -42,9 +42,23 @@ type arrayMod int
 
 type paginatedQuery string
 
+func ToQuery(term string) (string, string, error) {
+	if strings.ContainsRune(term, '_') {
+		withSpaces := strings.ReplaceAll(term, "_", " ")
+		withBars := strings.ReplaceAll(term, "_", "|")
+		return withSpaces, withBars, nil
+	} else if strings.ContainsRune(term, '+') {
+		withSpaces := strings.ReplaceAll(term, "+", " ")
+		withBars := strings.ReplaceAll(term, "+", "|")
+		return withSpaces, withBars, nil
+	} else {
+		return "", "", errors.New("invalid string")
+	}
+}
+
 func (q paginatedQuery) addOffset(pageNum uint) string {
-	offset := (pageNum - 1) * 10
-	return fmt.Sprintf("%s LIMIT 10 OFFSET %v", string(q), offset)
+	offset := (pageNum - 1) * 5
+	return fmt.Sprintf("%s LIMIT 5 OFFSET %v", string(q), offset)
 }
 
 const (

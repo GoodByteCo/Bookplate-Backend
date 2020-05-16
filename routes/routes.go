@@ -713,7 +713,7 @@ func SearchAuthors(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-func SearchAuthor(w http.ResponseWriter, r *http.Request) {
+func SearchAuthorForBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Accept-Charset", "utf-8")
 	w.Header().Set("Content-Type", "application/json")
 	pageL := r.URL.Query()["page"]
@@ -724,8 +724,7 @@ func SearchAuthor(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageL[0])
 	}
 	term := chi.URLParam(r, "term")
-
-	results := utils.SearchBooks(term, uint(page))
+	results := utils.SearchAuthorsForBooks(term, uint(page))
 	js, err := ffjson.Marshal(results)
 	if err != nil {
 		log.Println("somthing went wrong")

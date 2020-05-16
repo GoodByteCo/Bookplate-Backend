@@ -100,8 +100,23 @@ type ResWebAuthor struct {
 
 //Author data for book request
 type ResAuthorForBook struct {
-	AuthorId string `json:"author_id"`
+	AuthorID string `json:"author_id"`
 	Name     string `json:"name"`
+}
+
+func (a Author) ToResAuthorForBook() ResAuthorForBook {
+	return ResAuthorForBook{
+		AuthorID: a.AuthorId,
+		Name:     a.Name,
+	}
+}
+
+func (as Authors) ToResAuthorsForBook() []ResAuthorForBook {
+	var ra []ResAuthorForBook
+	for _, a := range as {
+		ra = append(ra, a.ToResAuthorForBook())
+	}
+	return ra
 }
 
 //List aliases
@@ -141,24 +156,50 @@ type ReqProfileList struct {
 	ProfileColour string           `json:"profile_color"`
 	BookList      []BookForProfile `json:"book_list"`
 }
-
-type ReqAuthorSearchResult struct {
+type ResAuthorForBookAdd struct {
+	Name     string                `json:"name"`
+	AuthorID string                `json:"author_id"`
+	Books    []BookForAuthorSearch `json:"books"`
+}
+type ResAuthorSearchResult struct {
 	Name     string  `json:"name"`
 	AuthorID string  `json:"author_id"`
 	Rank     float64 `json:"-" gorm:"column:trgm_rank"`
 }
 
-type ReqBookSearchResult struct {
-	Title    string  `json:"title"`
-	BookID   string  `json:"book_id"`
-	CoverURL string  `json:"cover_url"`
-	Rank     float64 `json:"-" gorm:"column:trgm_rank"`
+type ResBookSearchResult struct {
+	Title      string             `json:"title"`
+	BookID     string             `json:"book_id"`
+	CoverURL   string             `json:"cover_url"`
+	CoverColor string             `json:"cover_color"`
+	Year       int                `json:"year"`
+	Authors    []ResAuthorForBook `json:"authors"`
 }
 
 type BookForProfile struct {
 	BookID   string `json:"book_id"`
 	Title    string `json:"title"`
 	CoverURL string `json:"cover_url"`
+}
+
+type BookForAuthorSearch struct {
+	BookID string `json:"book_id"`
+	Title  string `json:"title"`
+}
+
+func (b Book) ToBookForAuthorSearch() BookForAuthorSearch {
+	return BookForAuthorSearch{
+		BookID: b.BookID,
+		Title:  b.Title,
+	}
+}
+
+func (bs Books) ToBooksForAuthorSearch() []BookForAuthorSearch {
+	var ba []BookForAuthorSearch
+	for _, b := range bs {
+		ba = append(ba, b.ToBookForAuthorSearch())
+	}
+	return ba
 }
 
 type FavouriteBook struct {

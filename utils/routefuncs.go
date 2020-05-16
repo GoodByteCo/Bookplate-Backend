@@ -224,11 +224,11 @@ func GetBookList(reader models.Reader, length int, itemGetter func(int) string) 
 	}
 
 }
-func SearchAuthors(term string, page uint) []models.ReqAuthorSearchResult {
+func SearchAuthors(term string, page uint) []models.ResAuthorSearchResult {
 	query := paginatedQuery("SELECT name, similarity(authors.name, $1) AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
-	results := make([]models.ReqAuthorSearchResult, 0, 10)
+	results := make([]models.ResAuthorSearchResult, 0, 10)
 	fmt.Println(query)
 	fmt.Println(term)
 	db.Raw(query, term).Find(&results)
@@ -236,16 +236,53 @@ func SearchAuthors(term string, page uint) []models.ReqAuthorSearchResult {
 	return results
 }
 
-func SearchBooks(term string, page uint) []models.ReqBookSearchResult {
-	query := paginatedQuery("SELECT title, book_id, cover_url, similarity(books.title, $1) AS trgm_rank FROM books WHERE title % $1 ORDER BY trgm_rank DESC").addOffset(page)
+func SearchBooks(spaces, bars string, page uint) []models.ResBookSearchResult {
+	type bookReturn struct {
+		BookID    string
+		FinalRank float64
+	}
+	query := paginatedQuery("SELECT book_id,((rank2*10::real)+(rank*5::real)+trgm_rank)as final_rank FROM books,to_tsquery('english_nostop',$1)AS query,phraseto_tsquery('english_nostop',$2)as query2,ts_rank_cd(bookname_col_stop,query)AS rank,ts_rank_cd(bookname_col_stop,query2,1)AS rank2,word_similarity(books.title,$2)AS trgm_rank WHERE((rank2*10::real)+(rank*5::real)+trgm_rank)>0.1 ORDER BY((rank2*10::real)+(rank*5::real)+trgm_rank)DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
-	results := make([]models.ReqBookSearchResult, 0, 10)
+	itermResults := make([]bookReturn, 0, 5)
+	results := make([]models.ResBookSearchResult, 0, 10)
 	fmt.Println(query)
-	fmt.Println(term)
-	db.Raw(query, term).Find(&results)
+	fmt.Println(spaces)
+	db.Raw(query, bars, spaces).Find(&itermResults)
+	var b models.Book
+	for _, item := range itermResults {
+		db.Where(models.Book{BookID: item.BookID}).Preload("Authors").First(&b)
+		bookResult := models.ResBookSearchResult{
+			Title:      b.Title,
+			BookID:     b.BookID,
+			CoverURL:   b.CoverURL,
+			Year:       b.Year,
+			CoverColor: b.BookColor,
+			Authors:    models.Authors(b.Authors).ToResAuthorsForBook(),
+		}
+		results = append(results, bookResult)
+
+	}
 	log.Println(results)
 	return results
+}
+
+func SearchAuthorsForBooks(term string, page uint) []models.ResAuthorForBookAdd {
+	results := SearchAuthors(term, page)
+	resultsWithBook := make([]models.ResAuthorForBookAdd, 0, 10)
+	db := bdb.Connect()
+	defer db.Close()
+	for _, r := range results {
+		var a models.Author
+		db.Where(models.Author{AuthorId: r.AuthorID}).Preload("Books").First(&a)
+		aForB := models.ResAuthorForBookAdd{
+			Name:     r.Name,
+			AuthorID: r.AuthorID,
+			Books:    models.Books(a.Books).ToBooksForAuthorSearch(),
+		}
+		resultsWithBook = append(resultsWithBook, aForB)
+	}
+	return resultsWithBook
 }
 
 func RemoveFriends(friendID uint, readerID uint) error {
