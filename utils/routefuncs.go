@@ -202,12 +202,13 @@ func GetProfile(reader models.Reader) models.ReqProfile {
 	}
 }
 
-func GetBookList(reader models.Reader, bookList []string) models.ReqProfileList {
+func GetBookList(reader models.Reader, bookList string) models.ReqProfileList {
 	db := bdb.Connect()
 	defer db.Close()
 	var booklist []models.BookForProfile
 	var books []models.Book
-	db.Select("book_id, title, cover_url").Where("book_id", bookList).Find(&books)
+	list := fmt.Sprintf("readers.%s", bookList)
+	db.Raw("select cover_url, book_id, title from books where books.book_id in (select unnest($1) from readers where readers.id = $2)", list, reader.ID).Find(&books)
 	for _, book := range books {
 		forProfile := models.BookForProfile{
 			BookID:   book.BookID,
