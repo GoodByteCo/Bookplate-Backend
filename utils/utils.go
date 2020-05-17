@@ -43,11 +43,7 @@ type arrayMod int
 type paginatedQuery string
 
 func ToQuery(term string) (spaces string, bars string) {
-	if strings.ContainsRune(term, '_') {
-		withSpaces := strings.ReplaceAll(term, "_", " ")
-		withBars := strings.ReplaceAll(term, "_", "|")
-		return withSpaces, withBars
-	} else if strings.ContainsRune(term, '+') {
+	if strings.ContainsRune(term, '+') {
 		withSpaces := strings.ReplaceAll(term, "+", " ")
 		withBars := strings.ReplaceAll(term, "+", "|")
 		return withSpaces, withBars
