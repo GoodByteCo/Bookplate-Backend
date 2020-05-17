@@ -208,7 +208,7 @@ func GetBookList(reader models.Reader, bookList string) models.ReqProfileList {
 	var booklist []models.BookForProfile
 	var books []models.Book
 	query := fmt.Sprintf("select cover_url, book_id, title from books where books.book_id in (select unnest(readers.%s) from readers where readers.id = %v)", bookList, reader.ID)
-	db.Raw(query).Find(&books)
+	db.Exec(query).Scan(&books)
 	for _, book := range books {
 		forProfile := models.BookForProfile{
 			BookID:   book.BookID,
