@@ -202,16 +202,15 @@ func GetProfile(reader models.Reader) models.ReqProfile {
 	}
 }
 
-func GetBookList(reader models.Reader, length int, itemGetter func(int) string) models.ReqProfileList {
+func GetBookList(reader models.Reader, bookList []string) models.ReqProfileList {
 	db := bdb.Connect()
 	defer db.Close()
 	var booklist []models.BookForProfile
-	for i := length - 1; i >= 0; i-- {
-		str := itemGetter(i)
-		var book models.Book
-		db.Where(models.Book{BookID: str}).Find(&book)
+	var books []models.Book
+	db.Select("book_id, title, cover_url").Where("book_id", bookList).Find(&books)
+	for _, book := range books {
 		forProfile := models.BookForProfile{
-			BookID:   str,
+			BookID:   book.BookID,
 			Title:    book.Title,
 			CoverURL: book.CoverURL,
 		}

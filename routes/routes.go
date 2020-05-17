@@ -367,7 +367,7 @@ func GetLiked(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
-	profile := utils.GetBookList(reader, len(reader.Liked), func(i int) string { return reader.Liked[i] })
+	profile := utils.GetBookList(reader, reader.Liked)
 	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
@@ -385,7 +385,7 @@ func GetRead(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
-	profile := utils.GetBookList(reader, len(reader.Read), func(i int) string { return reader.Read[i] })
+	profile := utils.GetBookList(reader, reader.Read)
 	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
@@ -403,7 +403,7 @@ func GetToRead(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
-	profile := utils.GetBookList(reader, len(reader.ToRead), func(i int) string { return reader.ToRead[i] })
+	profile := utils.GetBookList(reader, reader.ToRead)
 	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
@@ -421,7 +421,7 @@ func GetLibrary(w http.ResponseWriter, r *http.Request) {
 		//errpr
 		return
 	}
-	profile := utils.GetBookList(reader, len(reader.Library), func(i int) string { return reader.Library[i] })
+	profile := utils.GetBookList(reader, reader.Library)
 	js, err := ffjson.Marshal(profile)
 	if err != nil {
 		fmt.Println(err)
