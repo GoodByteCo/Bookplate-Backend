@@ -225,7 +225,7 @@ func GetBookList(reader models.Reader, bookList string) models.ReqProfileList {
 
 }
 func SearchAuthors(term string, page uint) []models.ResAuthorSearchResult {
-	query := paginatedQuery("SELECT name, similarity(authors.name, $1) AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC").addOffset(page)
+	query := paginatedQuery("SELECT name, author_id, similarity(authors.name, $1) AS trgm_rank FROM authors WHERE name % $1 ORDER BY trgm_rank DESC").addOffset(page)
 	db := bdb.Connect()
 	defer db.Close()
 	results := make([]models.ResAuthorSearchResult, 0, 10)
